@@ -4,49 +4,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Expense Calculator | Professional Dashboard</title>
+    <title>Premium Fuel Dashboard | Expense Calculator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <nav class="navbar">
-        <h1>Fuel Expense Calculator</h1>
-        <div class="nav-links">
-            <a href="/">Dashboard</a>
-        </div>
-    </nav>
-
     <div class="container">
+        <!-- Dashboard Header -->
+        <header class="glass-card">
+            <h1 class="title">Fuel Expense Calculator</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-top: -20px;">Premium Fintech Quantitative
+                Analysis</p>
+        </header>
+
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <ul class="flash-messages">
+        <div style="margin-bottom: 20px;">
             {% for message in messages %}
-            <li class="flash-error">{{ message }}</li>
+            <div class="glass-card"
+                style="padding: 15px; background: rgba(255, 63, 52, 0.1); color: var(--error); border-left: 4px solid var(--error); border-radius: 12px;">
+                {{ message }}
+            </div>
             {% endfor %}
-        </ul>
+        </div>
         {% endif %}
         {% endwith %}
 
-        <div class="card">
-            <h2 class="card-title">Calculate Trip Expense</h2>
+        <!-- Main Calculator Card -->
+        <main class="glass-card">
             <form action="/calculate" method="POST">
-                <div class="grid-form">
+                <div class="dashboard-grid">
                     <div class="form-group">
-                        <label for="distance">Distance (km)</label>
-                        <input type="number" step="0.01" name="distance" id="distance" required min="0.01">
+                        <label for="distance">Trip Distance (km)</label>
+                        <input type="number" step="0.01" name="distance" id="distance" required class="input-modern"
+                            placeholder="e.g. 150">
                     </div>
                     <div class="form-group">
-                        <label for="mileage">Mileage (km/Litre)</label>
-                        <input type="number" step="0.01" name="mileage" id="mileage" required min="0.01">
+                        <label for="mileage">Vehicle Mileage (km/L)</label>
+                        <input type="number" step="0.01" name="mileage" id="mileage" required class="input-modern"
+                            placeholder="e.g. 15">
                     </div>
                     <div class="form-group">
                         <label for="fuel_price">Fuel Price (per Litre)</label>
-                        <input type="number" step="0.01" name="fuel_price" id="fuel_price" required min="0.01">
+                        <input type="number" step="0.01" name="fuel_price" id="fuel_price" required class="input-modern"
+                            placeholder="e.g. 104.5">
                     </div>
                     <div class="form-group">
                         <label for="currency">Currency</label>
-                        <select name="currency" id="currency">
+                        <select name="currency" id="currency" class="input-modern" style="cursor: pointer;">
                             <option value="₹">INR (₹)</option>
                             <option value="$">USD ($)</option>
                             <option value="€">EUR (€)</option>
@@ -54,72 +60,116 @@
                     </div>
                     <div class="form-group">
                         <label for="trip_type">Trip Type</label>
-                        <select name="trip_type" id="trip_type">
-                            <option value="one-way">One-way</option>
-                            <option value="round-trip">Round-trip</option>
+                        <select name="trip_type" id="trip_type" class="input-modern" style="cursor: pointer;">
+                            <option value="one-way">One-Way</option>
+                            <option value="round-trip">Round-Trip</option>
                         </select>
                     </div>
                 </div>
 
-                <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
-                    <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem;">Fuel Comparison Mode
+                <!-- Advanced Comparison Section -->
+                <div style="border-top: 1px solid var(--glass-border); padding-top: 25px; margin-top: 25px;">
+                    <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 15px;">📊 Advanced Comparison
                         (Optional)</h3>
-                    <div class="grid-form">
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
                         <div class="form-group">
                             <label for="petrol_price">Petrol Price</label>
-                            <input type="number" step="0.01" name="petrol_price" id="petrol_price">
+                            <input type="number" step="0.01" name="petrol_price" id="petrol_price" class="input-modern">
                         </div>
                         <div class="form-group">
                             <label for="diesel_price">Diesel Price</label>
-                            <input type="number" step="0.01" name="diesel_price" id="diesel_price">
+                            <input type="number" step="0.01" name="diesel_price" id="diesel_price" class="input-modern">
                         </div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn">Calculate Now</button>
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn-premium">Perform Calculation</button>
+                    <a href="/reset" class="btn-reset">Reset Workspace</a>
+                </div>
             </form>
 
+            <!-- Results Section -->
             {% if results %}
-            <div class="results-section">
-                <h2 class="card-title" style="color: var(--success-color);">Calculation Results</h2>
-                <div class="results-grid">
-                    <div class="result-card">
-                        <span class="result-label">Trip Type</span>
-                        <div class="result-value" style="font-size: 1.2rem;">{{ results.trip_type }}</div>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Fuel Required</span>
-                        <div class="result-value">{{ results.fuel_required }} L</div>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Total Trip Cost</span>
-                        <div class="result-value">{{ results.currency }}{{ "{:,.2f}".format(results.total_cost) }}</div>
-                    </div>
-                    <div class="result-card">
-                        <span class="result-label">Monthly Expense (30 days)</span>
-                        <div class="result-value">{{ results.currency }}{{ "{:,.2f}".format(results.monthly_cost) }}
-                        </div>
-                    </div>
+            <div class="result-box">
+                <header style="margin-bottom: 25px;">
+                    <h2 style="color: var(--accent-primary); font-size: 1.4rem;">💡 Calculation Intelligence</h2>
+                </header>
+
+                <div class="results-display">
+                    <article class="stat-card">
+                        <div class="stat-label">Fuel Required</div>
+                        <div class="stat-value">{{ results.fuel_required }}<span
+                                style="font-size: 1rem; margin-left: 5px;">L</span></div>
+                    </article>
+                    <article class="stat-card" style="position: relative;">
+                        <div class="stat-label">Total Trip Expense</div>
+                        <div class="stat-value">{{ results.currency }}{{ "{:,.2f}".format(results.total_cost) }}</div>
+                        <div style="font-size: 0.7rem; color: var(--success); font-weight: 700;">PROCESSED</div>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-label">30-Day Projection</div>
+                        <div class="stat-value">{{ results.currency }}{{ "{:,.2f}".format(results.monthly_cost) }}</div>
+                    </article>
                 </div>
 
                 {% if results.comparison %}
-                <div class="comparison-box">
-                    <h3>📊 Fuel Comparison Analysis</h3>
-                    <p>Based on your trip, <strong>{{ results.comparison.cheaper }}</strong> is the more economical
-                        option.</p>
-                    <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
-                        <span>Petrol Trip Cost: {{ results.currency }}{{
-                            "{:,.2f}".format(results.comparison.petrol_cost) }}</span>
-                        <span>Diesel Trip Cost: {{ results.currency }}{{
-                            "{:,.2f}".format(results.comparison.diesel_cost) }}</span>
+                <div style="margin-top: 30px; background: rgba(255,255,255,0.4); border-radius: 12px; padding: 20px;">
+                    <h4 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">Fuel Cost Comparison
+                    </h4>
+                    <p>Based on your analytics, <strong>{{ results.comparison.cheaper }}</strong> is the optimal fuel
+                        choice.</p>
+                    <div style="margin-top: 10px; font-weight: 700; color: var(--accent-primary);">
+                        Savings Opportunity: {{ results.currency }}{{ "{:,.2f}".format(results.comparison.difference) }}
                     </div>
-                    <p style="margin-top: 1rem; font-weight: 700;">Potential Savings: {{ results.currency }}{{
-                        "{:,.2f}".format(results.comparison.difference) }}</p>
                 </div>
                 {% endif %}
             </div>
             {% endif %}
-        </div>
+        </main>
+
+        <!-- Calculation History -->
+        <section class="glass-card history-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 1.5rem;">📜 Transaction History</h2>
+                <a href="/clear-history" style="font-size: 0.8rem; color: var(--error); text-decoration: none;">Clear
+                    History</a>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="premium-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Trip</th>
+                            <th>Metrics</th>
+                            <th>Net Expense</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in history %}
+                        <tr>
+                            <td>{{ item.timestamp.strftime('%H:%M | %d %b') }}</td>
+                            <td>{{ item.trip_type.title() }}</td>
+                            <td>{{ item.distance }}km @ {{ item.mileage }}km/L</td>
+                            <td style="font-weight: 800; color: var(--accent-primary);">{{ item.currency }}{{
+                                "{:,.2f}".format(item.total_cost) }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No
+                                calculation records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 20px; color: rgba(255,255,255,0.8); font-size: 0.85rem;">
+            &copy; 2026 Fuel Expense Calculator | Industrial-Grade Software
+        </footer>
     </div>
 </body>
 
