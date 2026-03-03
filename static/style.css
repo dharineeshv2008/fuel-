@@ -1,14 +1,21 @@
-/* --- PREMIUM FINTECH DESIGN SYSTEM --- */
+/* --- MAJESTIC FINTECH DESIGN SYSTEM 2026 --- */
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --accent-primary: #6c5ce7;
-    --accent-secondary: #a29bfe;
-    --text-main: #1e272e;
-    --text-muted: #485460;
-    --success: #05c46b;
-    --error: #ff3f34;
-    --shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    --royal-bg: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0575e6);
+    --midnight-bg: linear-gradient(-45deg, #000000, #0f0c29, #1e1e2f, #020202);
+
+    --glass-royal: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --neon-blue: #00d2ff;
+    --neon-purple: #9d50bb;
+    --electric-cyan: #3a7bd5;
+
+    --text-white: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.7);
+    --success-glow: #00ff88;
+    --error-glow: #ff4d4d;
+
+    --shadow-lux: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -18,19 +25,24 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* --- ANIMATED GRADIENT BACKGROUND --- */
+/* --- ANIMATED MAJESTIC BACKGROUND --- */
 body {
-    background: linear-gradient(-45deg, #667eea, #764ba2, #2193b0, #6dd5ed);
+    background: var(--royal-bg);
     background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    animation: majesticGradient 15s ease infinite;
     min-height: 100vh;
-    color: var(--text-main);
+    color: var(--text-white);
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
 }
 
-@keyframes gradientBG {
+body.midnight-mode {
+    background: var(--midnight-bg);
+    background-size: 400% 400%;
+}
+
+@keyframes majesticGradient {
     0% {
         background-position: 0% 50%;
     }
@@ -44,158 +56,167 @@ body {
     }
 }
 
-/* --- GLASSMORPHISM CARD --- */
-.container {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 20px;
-    width: 100%;
-    animation: fadeIn 1s ease-out;
+/* --- THEME TOGGLE SWITCH --- */
+.theme-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-royal);
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
 }
 
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+/* --- CONTAINER & LAYOUT --- */
+.container {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 20px;
+    width: 100%;
+    animation: revealIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes revealIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+        filter: blur(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* --- GLASSMORPHISM CARDS --- */
+.majestic-card {
+    background: var(--glass-royal);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
+    border-radius: 20px;
     padding: 40px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lux);
+    position: relative;
+    overflow: hidden;
     margin-bottom: 30px;
+}
+
+.majestic-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: 0.5s;
+}
+
+.majestic-card:hover::before {
+    left: 100%;
 }
 
 /* --- TYPOGRAPHY --- */
-.title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #6c5ce7, #764ba2);
+.glow-title {
+    font-size: 3rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #ffffff, var(--neon-blue));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-align: center;
-    margin-bottom: 30px;
+    text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
 }
 
-/* --- GRID SYSTEM --- */
-.dashboard-grid {
+.sub-title {
+    text-align: center;
+    color: var(--text-dim);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin-bottom: 40px;
+}
+
+/* --- DASHBOARD GRID --- */
+.grid-system {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
+    gap: 30px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .form-group label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-dim);
+    text-transform: uppercase;
 }
 
-.input-modern {
-    padding: 14px 18px;
+.majestic-input {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    padding: 15px;
     border-radius: 12px;
-    border: 1.5px solid #dcdde1;
-    background: white;
+    color: white;
     font-size: 1rem;
-    transition: all 0.3s ease;
+    transition: var(--transition);
 }
 
-.input-modern:focus {
+.majestic-input:focus {
     outline: none;
-    border-color: var(--accent-primary);
-    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 /* --- BUTTONS --- */
-.btn-premium {
-    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
-    width: 100%;
-}
-
-.btn-premium:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 25px rgba(108, 92, 231, 0.4);
-}
-
-.btn-reset {
+.btn-neon {
     background: transparent;
-    border: 2px solid var(--text-muted);
-    color: var(--text-muted);
-    padding: 14px 28px;
+    border: 2px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 15px 30px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    margin-top: 15px;
-    transition: all 0.3s;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
 }
 
-.btn-reset:hover {
-    background: var(--text-muted);
-    color: white;
+.btn-neon:hover {
+    background: var(--neon-blue);
+    color: #000;
+    box-shadow: 0 0 30px var(--neon-blue);
 }
 
-/* --- RESULTS SECTION --- */
-.result-box {
-    animation: slideUp 0.6s ease-out;
-    background: rgba(108, 92, 231, 0.1);
-    border-radius: 18px;
-    padding: 30px;
-    margin-top: 40px;
-    border-left: 6px solid var(--accent-primary);
-}
-
-.results-display {
+/* --- SUMMARY GRID --- */
+.summary-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-}
-
-.stat-card {
-    text-align: center;
-}
-
-.stat-value {
-    font-size: 2.4rem;
-    font-weight: 800;
-    color: var(--accent-primary);
-}
-
-.stat-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* --- ANIMATIONS --- */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    margin-top: 40px;
+    animation: slideUp 0.8s ease-out;
 }
 
 @keyframes slideUp {
     from {
-        transform: translateY(30px);
+        transform: translateY(50px);
         opacity: 0;
     }
 
@@ -205,50 +226,95 @@ body {
     }
 }
 
-/* --- HISTORY TABLE --- */
-.history-section {
-    margin-top: 50px;
+.stat-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    transition: var(--transition);
 }
 
-.premium-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    border-radius: 12px;
-    overflow: hidden;
+.stat-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-10px);
 }
 
-.premium-table th {
-    background: var(--accent-primary);
+.stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.efficiency-badge {
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 900;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* --- MESSAGES --- */
+.alert-box {
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background: rgba(255, 77, 77, 0.1);
+    color: var(--error-glow);
+    border: 1px solid var(--error-glow);
+}
+
+/* --- CUSTOM SELECT --- */
+select.majestic-input option {
+    background: #1e1e2f;
     color: white;
-    padding: 16px;
-    text-align: left;
-    font-weight: 600;
 }
 
-.premium-table td {
-    padding: 16px;
-    background: white;
-    border-bottom: 1px solid #f1f2f6;
-    font-size: 0.95rem;
+/* --- DASHBOARD ELEMENTS --- */
+.badge-comparison {
+    background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    animation: pulseGlow 2s infinite;
 }
 
-.premium-table tr:last-child td {
-    border-bottom: none;
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 5px var(--neon-blue);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--neon-blue);
+    }
+
+    100% {
+        box-shadow: 0 0 5px var(--neon-blue);
+    }
 }
 
-/* --- MOBILE OPTIMIZATION --- */
+/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .container {
-        padding: 10px;
         margin: 20px auto;
     }
 
-    .glass-card {
-        padding: 25px;
+    .majestic-card {
+        padding: 20px;
     }
 
-    .title {
-        font-size: 1.8rem;
+    .glow-title {
+        font-size: 2rem;
     }
 }
