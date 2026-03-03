@@ -4,59 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Majestic Fuel Fintech | Premium Dashboard</title>
+    <title>Majestic Fuel Analysis | Fintech Master Terminal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 
-<body id="body">
-    <!-- Theme Switcher -->
-    <div class="theme-switch">
-        <span style="font-size: 0.7rem; font-weight: 800; color: var(--text-dim);">MAJESTIC THEME</span>
-        <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 20px;">
-            <input type="checkbox" id="themeToggle" onchange="toggleTheme()" style="opacity: 0; width: 0; height: 0;">
-            <span class="slider"
-                style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px;"></span>
-        </label>
+<body id="masterBody">
+    <div class="top-nav">
+        <button class="toggle-btn" onclick="masterToggleTheme()">SWITCH TO DARK MODE</button>
     </div>
 
     <div class="container">
-        <!-- Dashboard Header -->
         <header>
-            <h1 class="glow-title">Fuel Analysis Terminal</h1>
-            <p class="sub-title">Quantitative Expense Intelligence & Optimization</p>
+            <h1 class="majestic-title">Master Analyst Terminal</h1>
+            <p class="header-desc">Quantitative Fuel Intelligence & Economic Forecasting</p>
         </header>
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
-        <div class="alert-box">{{ message }}</div>
+        <div class="alert">{{ message }}</div>
         {% endfor %}
         {% endif %}
         {% endwith %}
 
-        <!-- Main Majestic Card -->
-        <main class="majestic-card">
-            <form action="/calculate" method="POST">
-                <div class="grid-system">
-                    <!-- Basic Analytics -->
+        <main class="dashboard-card">
+            <form action="/calculate" method="POST" id="calcForm">
+                <div class="input-grid">
                     <div class="form-group">
-                        <label>Primary Distance (km)</label>
-                        <input type="number" step="0.01" name="distance" required class="majestic-input"
-                            placeholder="e.g. 250">
+                        <label>Distance Val</label>
+                        <input type="number" step="0.01" name="distance" class="majestic-input" placeholder="e.g., 500">
                     </div>
                     <div class="form-group">
-                        <label>Vehicle Mileage (km/L)</label>
+                        <label>Unit</label>
+                        <select name="unit" class="majestic-input">
+                            <option value="km">Kilometers (km)</option>
+                            <option value="miles">Miles (mi)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle Mileage (Unit/L)</label>
                         <input type="number" step="0.01" name="mileage" required class="majestic-input"
-                            placeholder="e.g. 18.5">
+                            placeholder="e.g., 18">
                     </div>
-                    <div class="form-group">
-                        <label>Fuel Price (L)</label>
-                        <input type="number" step="0.01" name="fuel_price" required class="majestic-input"
-                            placeholder="e.g. 104.5">
-                    </div>
+                </div>
 
-                    <!-- Regional Settings -->
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Fuel Price (per L)</label>
+                        <input type="number" step="0.01" name="fuel_price" required class="majestic-input"
+                            placeholder="e.g., 104.5">
+                    </div>
                     <div class="form-group">
                         <label>Currency</label>
                         <select name="currency" class="majestic-input">
@@ -65,122 +63,195 @@
                             <option value="€">EUR (€)</option>
                         </select>
                     </div>
-
-                    <!-- Smart Trip Mode -->
                     <div class="form-group">
-                        <label>Smart Trip Mode</label>
-                        <select name="trip_type" id="tripType" class="majestic-input" onchange="toggleMultiCity()">
-                            <option value="one-way">One-Way</option>
-                            <option value="round-trip">Round-Trip</option>
-                            <option value="multi-city">Multi-City Trip</option>
-                        </select>
-                    </div>
-
-                    <!-- Multi-city Extra Distance (Hidden by default) -->
-                    <div class="form-group" id="multiCityGroup" style="display: none;">
-                        <label>Extra Stops Distance (km)</label>
-                        <input type="number" step="0.01" name="stops_distance" class="majestic-input"
-                            placeholder="e.g. 50">
+                        <label>Budget Mode (Reverse Calc)</label>
+                        <input type="number" step="0.01" name="budget" class="majestic-input"
+                            placeholder="Enter Amount">
                     </div>
                 </div>
 
-                <!-- Strategic Inputs -->
-                <div style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 30px;">
-                    <div class="grid-system">
+                <details>
+                    <summary>▶ ADVANCED STRATEGIC CONFIGURATION</summary>
+                    <div class="input-grid">
                         <div class="form-group">
-                            <label>Daily Commute (km)</label>
-                            <input type="number" step="0.01" name="daily_commute" class="majestic-input"
-                                placeholder="Daily average">
+                            <label>Trip Type</label>
+                            <select name="trip_type" class="majestic-input" id="tripType"
+                                onchange="toggleMasterMultiCity()">
+                                <option value="one-way">One-Way</option>
+                                <option value="round-trip">Round-Trip</option>
+                                <option value="multi-city">Multi-Stop</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="masterStops" style="display: none;">
+                            <label>Extra Stops Dist</label>
+                            <input type="number" step="0.01" name="stops_distance" class="majestic-input">
                         </div>
                         <div class="form-group">
-                            <label>Petrol Strategy Price</label>
-                            <input type="number" step="0.01" name="petrol_price" class="majestic-input"
-                                placeholder="Optional">
-                        </div>
-                        <div class="form-group">
-                            <label>Diesel Strategy Price</label>
-                            <input type="number" step="0.01" name="diesel_price" class="majestic-input"
-                                placeholder="Optional">
+                            <label>Passengers (Split Cost)</label>
+                            <input type="number" name="passengers" value="1" class="majestic-input">
                         </div>
                     </div>
-                </div>
 
-                <div style="display: flex; gap: 20px; margin-top: 30px;">
-                    <button type="submit" class="btn-neon">Initiate Analysis</button>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label>Daily Commute (Unit)</label>
+                            <input type="number" step="0.01" name="daily_commute" class="majestic-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Inflation Pulse (%)</label>
+                            <input type="number" step="0.1" name="inflation" value="5" class="majestic-input">
+                        </div>
+                    </div>
+
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label>Petrol Price (Comp)</label>
+                            <input type="number" step="0.1" name="petrol_price" class="majestic-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Diesel Price (Comp)</label>
+                            <input type="number" step="0.1" name="diesel_price" class="majestic-input">
+                        </div>
+                        <div class="form-group">
+                            <label>EV kWh Price</label>
+                            <input type="number" step="0.1" name="ev_price" value="8" class="majestic-input">
+                        </div>
+                    </div>
+                </details>
+
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button type="submit" class="btn-primary">Initiate Strategic Analysis</button>
                     <a href="/reset"
-                        style="text-decoration: none; color: var(--text-dim); margin-top: 35px; font-weight: 700; font-size: 0.8rem;">RECALIBRATE</a>
+                        style="color: var(--text-dim); text-decoration: none; font-size: 0.7rem; font-weight: 800;">RECALIBRATE</a>
                 </div>
             </form>
 
-            <!-- Majestic Results Panel -->
             {% if results %}
-            <div style="margin-top: 50px; border-top: 2px solid var(--glass-border); padding-top: 40px;">
-                <h2 style="font-size: 1.2rem; margin-bottom: 25px; color: var(--neon-blue);">📈 Visual Summary Analysis
-                </h2>
+            <div style="margin-top: 60px;">
+                <h2 style="color: var(--accent); margin-bottom: 30px; font-weight: 900; letter-spacing: 2px;">⚡
+                    QUANTITATIVE INSIGHTS</h2>
 
-                <div class="summary-container">
-                    <div class="stat-card">
-                        <div class="stat-label">Analysis Type</div>
-                        <div class="stat-value" style="font-size: 1.2rem;">{{ results.trip_type_display }}</div>
+                <div class="analysis-grid">
+                    <div class="stat-card highlight">
+                        <div class="stat-title">Total Journey Cost</div>
+                        <div class="stat-val">{{ results.currency }}{{ "{:,.2f}".format(results.total_cost) }}</div>
+                        <div class="badge badge-blue">REVISED</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Total Volume (L)</div>
-                        <div class="stat-value">{{ results.fuel_required }}</div>
-                    </div>
-                    <div class="stat-card" style="border-color: var(--neon-blue);">
-                        <div class="stat-label">Net Net Cost</div>
-                        <div class="stat-value" style="color: var(--neon-blue);">{{ results.currency }}{{
-                            "{:,.2f}".format(results.total_cost) }}</div>
+                        <div class="stat-title">Per Kilometer</div>
+                        <div class="stat-val" style="font-size: 1.2rem;">{{ results.currency }}{{ results.cost_per_unit
+                            }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Efficiency Rank</div>
-                        <div class="stat-value" style="font-size: 1.4rem;">{{ results.efficiency }}</div>
-                        <div class="efficiency-badge" style="background: var(--neon-blue); color: #000;">VERIFIED</div>
+                        <div class="stat-title">Split (per person)</div>
+                        <div class="stat-val" style="font-size: 1.2rem;">{{ results.currency }}{{ results.split }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Fuel Used</div>
+                        <div class="stat-val">{{ results.fuel_req }}L</div>
                     </div>
                 </div>
 
-                <!-- Projections Grid -->
-                <div class="summary-container">
+                <div class="analysis-grid">
                     <div class="stat-card">
-                        <div class="stat-label">Monthly Projection</div>
-                        <div class="stat-value">{{ results.currency }}{{ "{:,.2f}".format(results.monthly_cost) }}</div>
+                        <div class="stat-title">Monthly Forecast</div>
+                        <div class="stat-val">{{ results.currency }}{{ "{:,.2f}".format(results.monthly) }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Yearly Forecast</div>
-                        <div class="stat-value">{{ results.currency }}{{ "{:,.2f}".format(results.yearly_cost) }}</div>
+                        <div class="stat-title">Yearly Forecast</div>
+                        <div class="stat-val">{{ results.currency }}{{ "{:,.2f}".format(results.yearly) }}</div>
+                    </div>
+                    <div class="stat-card" style="border-color: var(--warning);">
+                        <div class="stat-title">5-Year Strategy</div>
+                        <div class="stat-val" style="color: var(--warning);">{{ results.currency }}{{
+                            "{:,.2f}".format(results.five_year) }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Efficiency Rank</div>
+                        <div class="stat-val" style="font-size:1.4rem;">{{ results.efficiency }}</div>
                     </div>
                 </div>
 
-                {% if results.comparison %}
-                <div class="badge-comparison">
-                    🔥 Comparison Insight: Choosing <strong>{{ results.comparison.cheaper }}</strong> optimizes your
-                    expense by <strong>{{ results.currency }}{{ "{:,.2f}".format(results.comparison.difference)
-                        }}</strong>
+                <div class="analysis-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Carbon Footprint</div>
+                        <div class="stat-val" style="color: var(--error);">{{ results.co2 }} kg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">EV Comparative</div>
+                        <div class="stat-val" style="color: var(--success);">{{ results.currency }}{{ results.ev_cost }}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">CNG Simulation</div>
+                        <div class="stat-val">{{ results.currency }}{{ results.comparison.cng_cost }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Hybrid Simulation</div>
+                        <div class="stat-val">{{ results.currency }}{{ results.comparison.hybrid_cost }}</div>
+                    </div>
+                </div>
+
+                {% if results.comparison.fuel %}
+                <div
+                    style="background: rgba(0,210,255,0.1); padding: 20px; border-radius: 12px; margin-top: 30px; border-left: 4px solid var(--accent);">
+                    🏦 <strong>Comparison Engine Insight:</strong> Choosing <strong>{{ results.comparison.fuel.cheaper
+                        }}</strong> optimizes costs by <strong>{{ results.currency }}{{
+                        "{:,.2f}".format(results.comparison.fuel.savings) }}</strong>
                 </div>
                 {% endif %}
+
+                <!-- Export Tools -->
+                <div class="export-panel">
+                    <form action="/export/pdf" method="POST">
+                        {% for k, v in results.items() %}
+                        {% if v is not mapping %}
+                        <input type="hidden" name="{{k}}" value="{{v}}">
+                        {% endif %}
+                        {% endfor %}
+                        <button type="submit" class="btn-outline">Download PDF Report</button>
+                    </form>
+                    <form action="/export/csv" method="POST">
+                        {% for k, v in results.items() %}
+                        {% if v is not mapping %}
+                        <input type="hidden" name="{{k}}" value="{{v}}">
+                        {% endif %}
+                        {% endfor %}
+                        <button type="submit" class="btn-outline">Export CSV Data</button>
+                    </form>
+                    <form action="/report" method="POST" target="_blank">
+                        {% for k, v in results.items() %}
+                        {% if v is not mapping %}
+                        <input type="hidden" name="{{k}}" value="{{v}}">
+                        {% endif %}
+                        {% endfor %}
+                        <button type="submit" class="btn-outline">Open Report View</button>
+                    </form>
+                </div>
             </div>
             {% endif %}
         </main>
 
-        <footer style="text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 40px;">
-            MAJESTIC FINTECH TERMINAL &copy; 2026 | BUILT FOR PERFORMANCE
+        <footer style="text-align: center; color: var(--text-dim); font-size: 0.75rem; margin-top: 50px;">
+            Institutional Grade Analytical Engine | Version 5.0 Majestic Master
         </footer>
     </div>
 
     <script>
-        function toggleMultiCity() {
+        function toggleMasterMultiCity() {
             const val = document.getElementById('tripType').value;
-            const group = document.getElementById('multiCityGroup');
+            const group = document.getElementById('masterStops');
             group.style.display = (val === 'multi-city') ? 'flex' : 'none';
         }
 
-        function toggleTheme() {
-            const body = document.getElementById('body');
-            const isChecked = document.getElementById('themeToggle').checked;
-            if (isChecked) {
-                body.classList.add('midnight-mode');
+        function masterToggleTheme() {
+            const body = document.getElementById('masterBody');
+            const btn = document.querySelector('.toggle-btn');
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                btn.textContent = 'SWITCH TO ROYAL MODE';
             } else {
-                body.classList.remove('midnight-mode');
+                btn.textContent = 'SWITCH TO DARK MODE';
             }
         }
     </script>
