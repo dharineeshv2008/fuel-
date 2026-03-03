@@ -128,44 +128,6 @@
             {% endif %}
         </main>
 
-        <!-- Calculation History -->
-        <section class="glass-card history-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem;">📜 Transaction History</h2>
-                <a href="/clear-history" style="font-size: 0.8rem; color: var(--error); text-decoration: none;">Clear
-                    History</a>
-            </div>
-
-            <div style="overflow-x: auto;">
-                <table class="premium-table">
-                    <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Trip</th>
-                            <th>Metrics</th>
-                            <th>Net Expense</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in history %}
-                        <tr>
-                            <td>{{ item.timestamp.strftime('%H:%M | %d %b') }}</td>
-                            <td>{{ item.trip_type.title() }}</td>
-                            <td>{{ item.distance }}km @ {{ item.mileage }}km/L</td>
-                            <td style="font-weight: 800; color: var(--accent-primary);">{{ item.currency }}{{
-                                "{:,.2f}".format(item.total_cost) }}</td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">No
-                                calculation records found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
         <!-- Footer -->
         <footer style="text-align: center; padding: 20px; color: rgba(255,255,255,0.8); font-size: 0.85rem;">
             &copy; 2026 Fuel Expense Calculator | Industrial-Grade Software
