@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Expense Calculator | Professional Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <h1>Fuel Expense Calculator</h1>
+        <div class="nav-links">
+            <a href="/">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="flash-messages">
+            {% for message in messages %}
+            <li class="flash-error">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2 class="card-title">Calculate Trip Expense</h2>
+            <form action="/calculate" method="POST">
+                <div class="grid-form">
+                    <div class="form-group">
+                        <label for="distance">Distance (km)</label>
+                        <input type="number" step="0.01" name="distance" id="distance" required min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="mileage">Mileage (km/Litre)</label>
+                        <input type="number" step="0.01" name="mileage" id="mileage" required min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="fuel_price">Fuel Price (per Litre)</label>
+                        <input type="number" step="0.01" name="fuel_price" id="fuel_price" required min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Currency</label>
+                        <select name="currency" id="currency">
+                            <option value="₹">INR (₹)</option>
+                            <option value="$">USD ($)</option>
+                            <option value="€">EUR (€)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trip_type">Trip Type</label>
+                        <select name="trip_type" id="trip_type">
+                            <option value="one-way">One-way</option>
+                            <option value="round-trip">Round-trip</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 1rem;">Fuel Comparison Mode
+                        (Optional)</h3>
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label for="petrol_price">Petrol Price</label>
+                            <input type="number" step="0.01" name="petrol_price" id="petrol_price">
+                        </div>
+                        <div class="form-group">
+                            <label for="diesel_price">Diesel Price</label>
+                            <input type="number" step="0.01" name="diesel_price" id="diesel_price">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Calculate Now</button>
+            </form>
+
+            {% if results %}
+            <div class="results-section">
+                <h2 class="card-title" style="color: var(--success-color);">Calculation Results</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <span class="result-label">Trip Type</span>
+                        <div class="result-value" style="font-size: 1.2rem;">{{ results.trip_type }}</div>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Fuel Required</span>
+                        <div class="result-value">{{ results.fuel_required }} L</div>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Total Trip Cost</span>
+                        <div class="result-value">{{ results.currency }}{{ "{:,.2f}".format(results.total_cost) }}</div>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Monthly Expense (30 days)</span>
+                        <div class="result-value">{{ results.currency }}{{ "{:,.2f}".format(results.monthly_cost) }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if results.comparison %}
+                <div class="comparison-box">
+                    <h3>📊 Fuel Comparison Analysis</h3>
+                    <p>Based on your trip, <strong>{{ results.comparison.cheaper }}</strong> is the more economical
+                        option.</p>
+                    <div style="margin-top: 1rem; display: flex; justify-content: space-between;">
+                        <span>Petrol Trip Cost: {{ results.currency }}{{
+                            "{:,.2f}".format(results.comparison.petrol_cost) }}</span>
+                        <span>Diesel Trip Cost: {{ results.currency }}{{
+                            "{:,.2f}".format(results.comparison.diesel_cost) }}</span>
+                    </div>
+                    <p style="margin-top: 1rem; font-weight: 700;">Potential Savings: {{ results.currency }}{{
+                        "{:,.2f}".format(results.comparison.difference) }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>
