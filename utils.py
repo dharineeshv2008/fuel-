@@ -33,6 +33,17 @@ def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_k
     co2_emissions = fuel_needed * 2.31
     consumption = (fuel_needed / actual_distance) * 100 # L/100km
     
+    # Wear and tear estimate (avg 0.15 per km excluding fuel)
+    wear_tear = actual_distance * 0.15
+    total_trip_impact = total_cost + wear_tear
+    
+    # Efficiency Insight
+    # benchmark: 20 km/L is considered high efficiency
+    savings_potential = 0
+    if mileage < 20:
+        optimal_fuel = actual_distance / 20
+        savings_potential = (fuel_needed - optimal_fuel) * fuel_price
+
     # Monthly/Yearly projections
     monthly_cost = 0
     yearly_cost = 0
@@ -50,7 +61,10 @@ def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_k
         "co2": co2_emissions,
         "consumption": consumption,
         "monthly_cost": monthly_cost,
-        "yearly_cost": yearly_cost
+        "yearly_cost": yearly_cost,
+        "wear_tear": wear_tear,
+        "total_impact": total_trip_impact,
+        "savings_potential": savings_potential
     }
 
 def plan_trip(total_dist, mileage, fuel_price, tank_size, speed):
@@ -124,4 +138,16 @@ def format_hours(hours_float):
     """Format decimal hours into 'X_h Y_m'."""
     hrs = int(hours_float)
     mins = round((hours_float - hrs) * 60)
+    if hrs == 0:
+        return f"{mins}m"
     return f"{hrs}h {mins}m"
+
+def get_monthly_insight(logs):
+    """Generate a summary insight based on fuel logs."""
+    if not logs:
+        return "No data yet. Start logging to see insights!"
+    
+    avg_price = sum(l['price'] for l in logs) / len(logs)
+    total_l = sum(l['litres'] for l in logs)
+    
+    return f"Avg. Price: {avg_price:.2f}/L | Total: {total_l:.1f}L filled."

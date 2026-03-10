@@ -90,7 +90,7 @@
                     result.distance > (form.get('distance', 0)|float) %}(round trip){% endif %}</span>
             </div>
 
-            <div class="result-grid">
+            <div class="result-grid slide-up delay-1">
                 <div class="result-item">
                     <span class="r-label">Fuel Required</span>
                     <span class="r-value" id="resultFuel">{{ result.fuel_needed|round(2) }} L</span>
@@ -118,8 +118,27 @@
                 </div>
             </div>
 
+            <div class="premium-breakdown slide-up delay-2"
+                style="margin-top: 20px; padding: 16px; background: var(--bg-hover); border-radius: var(--radius-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Total Trip Impact (Inc. Wear &
+                        Tear)</span>
+                    <span style="font-weight: 700; color: var(--accent-purple);">{{ format_currency(result.total_impact)
+                        }}</span>
+                </div>
+                {% if result.savings_potential > 0 %}
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                    <span style="font-size: 0.85rem; color: var(--accent-green); font-weight: 600;">Savings Potential
+                        (at 20km/L)</span>
+                    <span style="color: var(--accent-green); font-weight: 700;">- {{
+                        format_currency(result.savings_potential) }}</span>
+                </div>
+                {% endif %}
+            </div>
+
             {% if result.monthly_cost %}
-            <div id="projections"
+            <div id="projections" class="slide-up delay-3"
                 style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
                 <h4>Cost Projections</h4>
                 <div class="result-grid mt-2">
@@ -136,7 +155,7 @@
             {% endif %}
 
             {% if result.budget and result.monthly_cost > result.budget %}
-            <div class="budget-alert" id="budgetAlert">
+            <div class="budget-alert slide-up" id="budgetAlert">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 <span id="budgetAlertText">Monthly cost ({{ format_currency(result.monthly_cost) }}) exceeds your budget
                     ({{ format_currency(result.budget) }})!</span>

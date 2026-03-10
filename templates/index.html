@@ -41,7 +41,7 @@
 
     <div class="dashboard-bottom-row">
         <!-- Recent Activity -->
-        <div class="card">
+        <div class="card slide-up delay-1">
             <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
             <div class="activity-list" id="recentActivity">
                 {% if recent_activity %}
@@ -61,10 +61,19 @@
             </div>
         </div>
 
-        <!-- Tip -->
-        <div class="card tip-card">
-            <h4><i class="fa-regular fa-lightbulb"></i> Fuel Saving Tip</h4>
-            <p class="tip-text" id="fuelTip" style="margin-top:12px;">{{ tip }}</p>
+        <div class="dashboard-sidebar-column">
+            <!-- Monthly Insight -->
+            <div class="card slide-up delay-2"
+                style="background: var(--accent-primary-light); border-color: var(--accent-primary); color: var(--accent-primary);">
+                <h3><i class="fa-solid fa-chart-line"></i> Monthly Insight</h3>
+                <p style="font-weight: 600; font-size: 1rem;">{{ insight }}</p>
+            </div>
+
+            <!-- Tip -->
+            <div class="card tip-card slide-up delay-3">
+                <h4><i class="fa-regular fa-lightbulb"></i> Fuel Saving Tip</h4>
+                <p class="tip-text" id="fuelTip" style="margin-top:12px;">{{ tip }}</p>
+            </div>
         </div>
     </div>
 </div>

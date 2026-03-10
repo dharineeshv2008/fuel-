@@ -9,7 +9,7 @@
 
     <div class="settings-grid">
         <!-- Display & Preferences -->
-        <div class="card">
+        <div class="card slide-up">
             <h3><i class="fa-solid fa-palette"></i> Display & Preferences</h3>
             <form method="POST" action="{{ url_for('settings') }}">
                 <input type="hidden" name="action" value="save">
@@ -67,7 +67,7 @@
         </div>
 
         <!-- Data Management -->
-        <div class="card">
+        <div class="card slide-up delay-1">
             <h3><i class="fa-solid fa-database"></i> Session Data Management</h3>
 
             <div class="setting-item">

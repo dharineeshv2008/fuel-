@@ -3,7 +3,7 @@ import uuid
 import csv
 from datetime import datetime
 from flask import Flask, render_template, request, session, redirect, url_for, flash, Response
-from utils import calculate_fuel, plan_trip, get_random_tip, format_currency
+from utils import calculate_fuel, plan_trip, get_random_tip, format_currency, get_monthly_insight
 
 # Explicitly set paths for Vercel deployment safety
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -84,7 +84,8 @@ def dashboard():
                            total_distance=total_distance,
                            vehicle_count=vehicle_count,
                            recent_activity=recent_activity,
-                           tip=get_random_tip())
+                           tip=get_random_tip(),
+                           insight=get_monthly_insight(session["fuel_logs"]))
 
 @app.route("/calculator", methods=["GET", "POST"])
 def calculator():

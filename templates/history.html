@@ -7,7 +7,7 @@
         <p class="page-subtitle">Track your fuel purchases and saved calculations.</p>
     </div>
 
-    <div class="card" style="margin-bottom: 24px;">
+    <div class="card slide-up" style="margin-bottom: 24px;">
         <h3><i class="fa-solid fa-plus"></i> Add Fuel Log</h3>
         <!-- No JS dropdown filling anymore, using server rendered dropdown -->
         <form method="POST" action="{{ url_for('history') }}">
@@ -50,7 +50,7 @@
 
     <div class="dashboard-bottom-row">
         <!-- Logs List -->
-        <div class="card">
+        <div class="card slide-up delay-1">
             <h3><i class="fa-solid fa-gas-pump"></i> Fuel Purchase Logs</h3>
             <div class="history-list">
                 {% if logs %}
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Saved Calculations -->
-        <div class="card">
+        <div class="card slide-up delay-2">
             <h3><i class="fa-solid fa-calculator"></i> Saved Calculations</h3>
             <div class="history-list">
                 {% if calcs %}
