@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ theme }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelWise — Smart Fuel Cost Calculator</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- SIDEBAR NAV -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fa-solid fa-gas-pump"></i>
+                <span>FuelWise</span>
+            </div>
+            <!-- Mobile closed menu placeholder -->
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}"
+                class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('calculator') }}"
+                class="nav-item {% if request.endpoint == 'calculator' %}active{% endif %}">
+                <i class="fa-solid fa-calculator"></i><span>Calculator</span>
+            </a>
+            <a href="{{ url_for('trip_planner') }}"
+                class="nav-item {% if request.endpoint == 'trip_planner' %}active{% endif %}">
+                <i class="fa-solid fa-route"></i><span>Trip Planner</span>
+            </a>
+            <a href="{{ url_for('history') }}" class="nav-item {% if request.endpoint == 'history' %}active{% endif %}">
+                <i class="fa-solid fa-clock-rotate-left"></i><span>History</span>
+            </a>
+            <a href="{{ url_for('vehicles') }}"
+                class="nav-item {% if request.endpoint == 'vehicles' %}active{% endif %}">
+                <i class="fa-solid fa-car-side"></i><span>Vehicles</span>
+            </a>
+            <a href="{{ url_for('settings') }}"
+                class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                <i class="fa-solid fa-gear"></i><span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form action="{{ url_for('settings') }}" method="POST" style="margin: 0;">
+                <input type="hidden" name="action" value="save">
+                <input type="hidden" name="theme" value="{{ 'light' if theme == 'dark' else 'dark' }}">
+                <input type="hidden" name="currency" value="{{ currency }}">
+                <button type="submit" class="theme-toggle">
+                    {% if theme == 'dark' %}
+                    <i class="fa-solid fa-sun"></i><span>Light Mode</span>
+                    {% else %}
+                    <i class="fa-solid fa-moon"></i><span>Dark Mode</span>
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- MOBILE HEADER -->
+        <header class="mobile-header">
+            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="mobile-title">
+                <i class="fa-solid fa-gas-pump"></i> FuelWise
+            </div>
+        </header>
+
+        {% block content %}{% endblock content %}
+    </main>
+
+    <!-- TOAST NOTIFICATIONS (Uses Flask Flash Messages) -->
+    <div class="toast-container" id="toastContainer">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }}">
+            {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
+            {% elif category == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
+            {% elif category == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- TINY SCRIPT TO HIDE TOASTS AND HANDLE MOBILE MENU -->
+    <script>
+        // Only minimal script to handle mobile sidebar and hide flash messages after 3 seconds
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(function () {
+                var toasts = document.querySelectorAll(".toast");
+                toasts.forEach(function (t) { t.style.display = "none"; });
+            }, 3000);
+
+            var menuToggle = document.getElementById("menuToggle");
+            var sidebar = document.getElementById("sidebar");
+            var closeBtn = document.getElementById("sidebarClose");
+            var overlay = document.getElementById("sidebarOverlay");
+
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener("click", function () {
+                    sidebar.classList.add("open");
+                    overlay.classList.add("active");
+                });
+            }
+            if (closeBtn && overlay) {
+                closeBtn.addEventListener("click", function () {
+                    sidebar.classList.remove("open");
+                    overlay.classList.remove("active");
+                });
+                overlay.addEventListener("click", function () {
+                    sidebar.classList.remove("open");
+                    overlay.classList.remove("active");
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

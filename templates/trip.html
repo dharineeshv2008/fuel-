@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page active" id="page-trip">
+    <div class="page-header">
+        <h1>Trip Planner</h1>
+        <p class="page-subtitle">Plan long trips and know exactly when to refuel.</p>
+    </div>
+
+    <div class="calc-layout">
+        <form method="POST" action="{{ url_for('trip_planner') }}" id="tripForm" class="card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Total Distance (km)</label>
+                    <input type="number" step="1" name="total_dist" value="{{ form.get('total_dist', '') }}" required
+                        placeholder="Ex: 850">
+                </div>
+                <!-- Vehicle Selector updates form via submit -->
+                <div class="form-group">
+                    <label>Vehicle Profile (Optional)</label>
+                    <select name="vehicle_id" onchange="this.form.submit()">
+                        <option value="">— Select a Vehicle —</option>
+                        {% for v in vehicles %}
+                        <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
+                            ({{ v.mileage }} km/L)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mileage (km/L)</label>
+                    {% set auto_mpg = form.get('mileage', '') %}
+                    {% set auto_tank = form.get('tank_size', '45') %}
+                    {% if form.get('vehicle_id') %}
+                    {% for v in vehicles %}
+                    {% if v.id == form.get('vehicle_id') %}
+                    {% set auto_mpg = v.mileage|string %}
+                    {% set auto_tank = v.tankSize|string %}
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <input type="number" step="0.1" name="mileage" value="{{ auto_mpg }}" required placeholder="Ex: 15">
+                </div>
+                <div class="form-group">
+                    <label>Fuel Price (per L)</label>
+                    <input type="number" step="0.01" name="fuel_price" value="{{ form.get('fuel_price', '') }}" required
+                        placeholder="Current cost">
+                </div>
+                <div class="form-group">
+                    <label>Tank Size (L)</label>
+                    <input type="number" step="1" name="tank_size" value="{{ auto_tank }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Avg. Speed (km/h)</label>
+                    <input type="number" step="1" name="speed" value="{{ form.get('speed', '60') }}">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-map-location-dot"></i> Plan My
+                Trip</button>
+        </form>
+
+        <!-- RESULTS SECTION -->
+        <div class="card" id="tripResults">
+            {% if result %}
+            <h3><i class="fa-solid fa-clipboard-list"></i> Trip Summary</h3>
+            <div class="result-grid" id="tripSummaryGrid" style="margin-bottom: 24px;">
+                <div class="result-item"><span class="r-label">Total Distance</span><span class="r-value">{{
+                        result.total_dist|round|int }} km</span></div>
+                <div class="result-item"><span class="r-label">Total Fuel</span><span class="r-value">{{
+                        result.total_fuel|round(2) }} L</span></div>
+                <div class="result-item"><span class="r-label">Total Cost</span><span class="r-value">{{
+                        format_currency(result.total_cost) }}</span></div>
+                <div class="result-item"><span class="r-label">Travel Time</span><span class="r-value">{{ ('%d' %
+                        result.travel_time) }}h {{ ('%d' % ((result.travel_time % 1)*60)) }}m</span></div>
+                <div class="result-item"><span class="r-label">Range per Tank</span><span class="r-value">{{
+                        result.range|round|int }} km</span></div>
+                <div class="result-item"><span class="r-label">Fuel Stops</span><span class="r-value">{{
+                        result.num_stops }}</span></div>
+            </div>
+
+            <h4><i class="fa-solid fa-gas-pump"></i> Recommended Fuel Stops</h4>
+            <div class="fuel-stops-list" id="fuelStopsList">
+                {% if result.num_stops == 0 %}
+                <p class="empty-state">No fuel stops needed — you can make it in one tank! 🎉</p>
+                {% else %}
+                {% for stop in result.stops %}
+                <div class="fuel-stop">
+                    <div class="stop-num">{{ stop.num }}</div>
+                    <div class="stop-info">
+                        <strong>Stop at {{ stop.km|round|int }} km</strong>
+                        <span>Fill {{ stop.litres|round(1) }} L · Cost: {{ format_currency(stop.cost) }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>Enter your trip details on the left to generate an itinerary.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

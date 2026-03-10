@@ -1,185 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Planner | Easy & Majestic Dash</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <div class="container">
-        <header>
-            <h1>Fuel Expense Planner</h1>
-            <p class="subtitle">Effortless travel budgeting for everyone.</p>
-        </header>
-
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert-friendly">💡 Tip: {{ message }}</div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
-
-        <!-- Mode Toggle -->
-        <div class="mode-toggle">
-            <button class="mode-btn active" onclick="toggleMode('simple')">Simple View</button>
-            <button class="mode-btn" onclick="toggleMode('advanced')">Analytical View</button>
-        </div>
-
-        <main class="majestic-card">
-            <form action="/calculate" method="POST" id="calcForm">
-                <section>
-                    <h2>🚗 Trip Basics</h2>
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label>Distance</label>
-                            <input type="number" step="0.01" name="distance" required class="friendly-input"
-                                placeholder="e.g. 150">
-                            <span class="help-text">How far is your trip in total?</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Vehicle Mileage</label>
-                            <input type="number" step="0.01" name="mileage" required class="friendly-input"
-                                placeholder="e.g. 15">
-                            <span class="help-text">How many km does your car run per litre?</span>
-                        </div>
-                    </div>
-
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label>Fuel Price</label>
-                            <input type="number" step="0.01" name="fuel_price" required class="friendly-input"
-                                placeholder="e.g. 104">
-                            <span class="help-text">Current cost of 1 litre of fuel.</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Trip Type</label>
-                            <select name="trip_type" class="friendly-input">
-                                <option value="one-way">One-Way Trip</option>
-                                <option value="round-trip">Round Trip (Back & Forth)</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="advancedSection"
-                    style="display: none; border-top: 1px solid #eee; padding-top: 30px; margin-top: 20px;">
-                    <h2>⚖️ Advanced Planning</h2>
-                    <div class="input-grid">
-                        <div class="form-group">
-                            <label>Daily Commute (km)</label>
-                            <input type="number" step="0.01" name="daily_commute" class="friendly-input"
-                                placeholder="Optional">
-                            <span class="help-text">Used for monthly/yearly estimates.</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Comparison (Petrol Price)</label>
-                            <input type="number" step="0.01" name="petrol_price" class="friendly-input">
-                            <span class="help-text">Compare with petrol costs.</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Comparison (Diesel Price)</label>
-                            <input type="number" step="0.01" name="diesel_price" class="friendly-input">
-                            <span class="help-text">Compare with diesel costs.</span>
-                        </div>
-                    </div>
-                </section>
-
-                <button type="submit" class="btn-majestic">Calculate My Fuel Cost</button>
-            </form>
-
-            {% if results %}
-            <div id="results" style="margin-top: 50px;">
-                <div class="summary-card {{ results.color }}">
-                    <p style="font-weight: 800; text-transform: uppercase; color: var(--text-muted);">Estimated Total
-                        Cost</p>
-                    <div class="main-price">{{ results.currency }}{{ "{:,.2f}".format(results.total_cost) }}</div>
-                    <p style="font-weight: 700;">For your {{ results.actual_distance }}km journey</p>
-                </div>
-
-                <div class="input-grid" style="margin-top: 40px; text-align: center;">
-                    <div>
-                        <p class="help-text">Fuel Required</p>
-                        <p style="font-size: 1.5rem; font-weight: 800;">{{ results.fuel_needed }} L</p>
-                    </div>
-                    <div>
-                        <p class="help-text">Efficiency Rating</p>
-                        <p style="font-size: 1.2rem; font-weight: 800;">{{ results.rating }}</p>
-                    </div>
-                </div>
-
-                {% if results.monthly_cost > 0 %}
-                <div class="input-grid" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 30px;">
-                    <div>
-                        <p class="help-text">Monthly Estimate</p>
-                        <p style="font-weight: 700;">{{ results.currency }}{{ "{:,.2f}".format(results.monthly_cost) }}
-                        </p>
-                    </div>
-                    <div>
-                        <p class="help-text">Yearly Estimate</p>
-                        <p style="font-weight: 700;">{{ results.currency }}{{ "{:,.2f}".format(results.yearly_cost) }}
-                        </p>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if results.comparison %}
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 30px;">
-                    📢 <strong>Quick Tip:</strong> Choosing <strong>{{ results.comparison.cheaper }}</strong> could save
-                    you <strong>{{ results.currency }}{{ "{:,.2f}".format(results.comparison.difference) }}</strong> on
-                    this trip!
-                </div>
-                {% endif %}
-
-                <div style="display: flex; gap: 15px; margin-top: 40px; justify-content: center;">
-                    <form action="/export/pdf" method="POST">
-                        {% for k, v in results.items() %}
-                        {% if v is not mapping %}<input type="hidden" name="{{k}}" value="{{v}}">{% endif %}
-                        {% endfor %}
-                        <button type="submit" class="mode-btn">Download PDF Report</button>
-                    </form>
-                    <a href="/reset" class="mode-btn" style="text-decoration: none; color: inherit;">Start Over</a>
-                </div>
-            </div>
-            {% endif %}
-        </main>
-
-        <!-- Educational Section -->
-        <section class="majestic-card">
-            <h2>💡 How is this calculated?</h2>
-            <p>We use a simple 3-step magic formula to figure out your costs:</p>
-            <ul style="margin-left: 20px; margin-top: 15px;">
-                <li><strong>Step 1:</strong> Distance ÷ Mileage = How many litres you need.</li>
-                <li><strong>Step 2:</strong> Litres × Fuel Price = Your total trip cost.</li>
-                <li><strong>Step 3:</strong> 30 Days × Daily Commute = Your monthly forecast.</li>
-            </ul>
-        </section>
-
-        <footer style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 50px;">
-            &copy; 2026 Fuel Planner | Simple. Majestic. Reliable.
-        </footer>
+{% block content %}
+<div class="page active" id="page-dashboard">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p class="page-subtitle">Welcome back! Here's your fuel overview.</p>
     </div>
 
-    <script>
-        function toggleMode(mode) {
-            const adv = document.getElementById('advancedSection');
-            const btns = document.querySelectorAll('.mode-btn');
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-info">
+                <span class="stat-value" id="statTotalSpent">{{ format_currency(total_spent) }}</span>
+                <span class="stat-label">Total Spent</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fa-solid fa-route"></i></div>
+            <div class="stat-info">
+                <span class="stat-value" id="statTotalDistance">{{ total_distance|round|int }} km</span>
+                <span class="stat-label">Calc Distance</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="fa-solid fa-gas-pump"></i></div>
+            <div class="stat-info">
+                <span class="stat-value" id="statTotalFuel">{{ total_fuel|round(1) }} L</span>
+                <span class="stat-label">Total Fuel Add</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="fa-solid fa-car-side"></i></div>
+            <div class="stat-info">
+                <span class="stat-value" id="statVehicleCount">{{ vehicle_count }}</span>
+                <span class="stat-label">Vehicles</span>
+            </div>
+        </div>
+    </div>
 
-            if (mode === 'advanced') {
-                adv.style.display = 'block';
-                btns[1].classList.add('active');
-                btns[0].classList.remove('active');
-            } else {
-                adv.style.display = 'none';
-                btns[0].classList.add('active');
-                btns[1].classList.remove('active');
-            }
-        }
-    </script>
-</body>
+    <div class="dashboard-bottom-row">
+        <!-- Recent Activity -->
+        <div class="card">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+            <div class="activity-list" id="recentActivity">
+                {% if recent_activity %}
+                {% for item in recent_activity %}
+                <div class="history-entry">
+                    <div class="he-info">
+                        <span class="he-title"><i class="fa-solid {{ item.icon }}"
+                                style="margin-right:6px;color:var(--accent-primary)"></i>{{ item.text }}</span>
+                        <span class="he-detail">{{ item.date }}</span>
+                    </div>
+                    <span class="he-amount">{{ item.amount }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="empty-state">No fuel logs yet. Start by calculating your trip cost!</p>
+                {% endif %}
+            </div>
+        </div>
 
-</html>
+        <!-- Tip -->
+        <div class="card tip-card">
+            <h4><i class="fa-regular fa-lightbulb"></i> Fuel Saving Tip</h4>
+            <p class="tip-text" id="fuelTip" style="margin-top:12px;">{{ tip }}</p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

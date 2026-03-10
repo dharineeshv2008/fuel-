@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page active" id="page-vehicles">
+    <div class="page-header">
+        <h1>My Vehicles</h1>
+        <p class="page-subtitle">Manage your vehicles for quick calculations.</p>
+    </div>
+
+    <!-- Add Vehicle Form -->
+    <div class="card">
+        <h3><i class="fa-solid fa-plus"></i> Add New Vehicle</h3>
+        <form id="addVehicleForm" method="POST" action="{{ url_for('vehicles') }}">
+            <input type="hidden" name="action" value="add">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Vehicle Name</label>
+                    <input type="text" name="name" required placeholder="Ex: Honda City">
+                </div>
+                <div class="form-group">
+                    <label>Vehicle Type</label>
+                    <select name="type">
+                        <option value="car">Car / Sedan</option>
+                        <option value="suv">SUV / Truck</option>
+                        <option value="bike">Motorcycle</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Avg. Mileage (km/L)</label>
+                    <input type="number" step="0.1" name="mileage" required placeholder="Ex: 18">
+                </div>
+                <div class="form-group">
+                    <label>Fuel Type</label>
+                    <select name="fuelType">
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="CNG">CNG</option>
+                        <option value="EV">Electric (EV)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tank Size (L)</label>
+                    <input type="number" step="1" name="tankSize" value="45">
+                </div>
+                <div class="form-group">
+                    <label>Year (Optional)</label>
+                    <input type="number" min="1990" max="2030" step="1" name="year" placeholder="Ex: 2022">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-check"></i>
+                Add Vehicle</button>
+        </form>
+    </div>
+
+    <!-- Vehicle Gallery -->
+    <div class="vehicle-grid" id="vehicleList">
+        {% if vehicles %}
+        {% for v in vehicles %}
+        <div class="vehicle-card" style="margin-bottom: 20px;">
+            <div class="vc-header">
+                <div class="vc-icon">
+                    <i
+                        class="fa-solid {% if v.type == 'bike' %}fa-motorcycle{% elif v.type == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
+                </div>
+                <div>
+                    <div class="vc-name">{{ v.name }}</div>
+                    <div class="vc-type">{{ v.type }}</div>
+                </div>
+            </div>
+            <div class="vc-details">
+                <span class="vc-tag">⛽ {{ v.mileage }} km/L</span>
+                <span class="vc-tag">🛢️ {{ v.fuelType }}</span>
+                <span class="vc-tag">📦 {{ v.tankSize|round|int }} L tank</span>
+                {% if v.year %}
+                <span class="vc-tag">📅 {{ v.year }}</span>
+                {% endif %}
+            </div>
+            <div class="vc-actions">
+                <form method="POST" action="{{ url_for('vehicles') }}"
+                    onsubmit="return confirm('Are you sure you want to delete {{ v.name }}?');" style="flex:1;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="vehicle_id" value="{{ v.id }}">
+                    <button type="submit" class="vc-delete" style="width: 100%; border-radius: 6px;"><i
+                            class="fa-solid fa-trash"></i> Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="empty-state"
+            style="grid-column: 1 / -1; background: var(--bg-card); padding: 40px; border-radius: var(--radius); border: 1px dashed var(--border-color);">
+            No vehicles added yet. Add your first vehicle above!
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}

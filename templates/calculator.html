@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page active" id="page-calculator">
+    <div class="page-header">
+        <h1>Fuel Calculator</h1>
+        <p class="page-subtitle">Estimate fuel costs instantly.</p>
+    </div>
+
+    <div class="calc-layout">
+        <form method="POST" action="{{ url_for('calculator') }}" id="calcForm" class="card">
+            <input type="hidden" name="action" value="calculate">
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Distance (km)</label>
+                    <input type="number" step="0.1" name="distance" value="{{ form.get('distance', '') }}" required
+                        placeholder="Ex: 200">
+                </div>
+                <!-- Vehicle Selector updates mileage logic via form submission -->
+                <div class="form-group">
+                    <label>Vehicle Profile (Optional)</label>
+                    <select name="vehicle_id" onchange="this.form.submit()">
+                        <option value="">— Select a Vehicle —</option>
+                        {% for v in vehicles %}
+                        <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
+                            ({{ v.mileage }} km/L)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mileage (km/L)</label>
+                    {% set auto_mpg = form.get('mileage', '') %}
+                    {% if form.get('vehicle_id') %}
+                    {% for v in vehicles %}
+                    {% if v.id == form.get('vehicle_id') %}
+                    {% set auto_mpg = v.mileage|string %}
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <input type="number" step="0.1" name="mileage" value="{{ auto_mpg }}" required placeholder="Ex: 15">
+                </div>
+                <div class="form-group">
+                    <label>Fuel Price (per L)</label>
+                    <input type="number" step="0.01" name="fuel_price" value="{{ form.get('fuel_price', '') }}" required
+                        placeholder="Current cost">
+                </div>
+                <div class="form-group">
+                    <label>Trip Type</label>
+                    <select name="trip_type">
+                        <option value="one-way" {% if form.get('trip_type')=='one-way' %}selected{% endif %}>One Way
+                        </option>
+                        <option value="round-trip" {% if form.get('trip_type')=='round-trip' %}selected{% endif %}>Round
+                            Trip</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Passengers</label>
+                    <input type="number" min="1" step="1" name="passengers" value="{{ form.get('passengers', '1') }}">
+                </div>
+            </div>
+
+            <h4 style="margin: 24px 0 16px;">Budget Projections</h4>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Daily Commute (km)</label>
+                    <input type="number" step="1" name="daily_km" value="{{ form.get('daily_km', '') }}"
+                        placeholder="Optional">
+                </div>
+                <div class="form-group">
+                    <label>Monthly Budget</label>
+                    <input type="number" step="1" name="budget" value="{{ form.get('budget', '') }}"
+                        placeholder="Optional">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-bolt"></i> Calculate
+                Cost</button>
+        </form>
+
+        <!-- RESULTS SECTION -->
+        <div class="card" id="calcResults">
+            {% if result %}
+            <h3><i class="fa-solid fa-square-poll-vertical"></i> Results</h3>
+            <div class="result-hero" id="resultHero"
+                style="background: linear-gradient(135deg, {% if result.total_cost < 500 %}#10b981, #059669{% elif result.total_cost < 2000 %}#f59e0b, #d97706{% else %}#ef4444, #dc2626{% endif %})">
+                <span class="result-label">ESTIMATED TOTAL COST</span>
+                <span class="result-price" id="resultPrice">{{ format_currency(result.total_cost) }}</span>
+                <span class="result-sub" id="resultDistance">for {{ result.distance|round|int }} km {% if
+                    result.distance > (form.get('distance', 0)|float) %}(round trip){% endif %}</span>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-item">
+                    <span class="r-label">Fuel Required</span>
+                    <span class="r-value" id="resultFuel">{{ result.fuel_needed|round(2) }} L</span>
+                </div>
+                <div class="result-item">
+                    <span class="r-label">Cost per km</span>
+                    <span class="r-value" id="resultCostKm">{{ format_currency(result.cost_per_km) }}</span>
+                </div>
+                <div class="result-item">
+                    <span class="r-label">Cost / Passenger</span>
+                    <span class="r-value" id="resultCostPassenger">{{ format_currency(result.cost_per_passenger)
+                        }}</span>
+                </div>
+                <div class="result-item">
+                    <span class="r-label">Efficiency</span>
+                    <span class="r-value" id="resultRating" style="font-size: 0.95rem;">{{ result.rating }}</span>
+                </div>
+                <div class="result-item">
+                    <span class="r-label">CO₂ Emissions</span>
+                    <span class="r-value" id="resultCO2">{{ result.co2|round(2) }} kg</span>
+                </div>
+                <div class="result-item">
+                    <span class="r-label">Consumption</span>
+                    <span class="r-value" id="resultConsumption">{{ result.consumption|round(1) }} L/100km</span>
+                </div>
+            </div>
+
+            {% if result.monthly_cost %}
+            <div id="projections"
+                style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                <h4>Cost Projections</h4>
+                <div class="result-grid mt-2">
+                    <div class="result-item">
+                        <span class="r-label">Monthly Estimate</span>
+                        <span class="r-value" id="resultMonthly">{{ format_currency(result.monthly_cost) }}</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="r-label">Yearly Estimate</span>
+                        <span class="r-value" id="resultYearly">{{ format_currency(result.yearly_cost) }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if result.budget and result.monthly_cost > result.budget %}
+            <div class="budget-alert" id="budgetAlert">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="budgetAlertText">Monthly cost ({{ format_currency(result.monthly_cost) }}) exceeds your budget
+                    ({{ format_currency(result.budget) }})!</span>
+            </div>
+            {% endif %}
+
+            <div class="result-actions">
+                <form action="{{ url_for('calculator') }}" method="POST" style="flex:1;">
+                    <input type="hidden" name="action" value="save_calc">
+                    <input type="hidden" name="distance_val" value="{{ result.distance }}">
+                    <input type="hidden" name="fuel_needed_val" value="{{ result.fuel_needed }}">
+                    <input type="hidden" name="total_cost_val" value="{{ result.total_cost }}">
+                    <input type="hidden" name="trip_type_val"
+                        value="{{ 'Round Trip' if form.get('trip_type') == 'round-trip' else 'One Way' }}">
+                    <button type="submit" class="btn btn-outline" style="width:100%;"><i
+                            class="fa-solid fa-floppy-disk"></i> Save to History</button>
+                </form>
+
+                <form action="{{ url_for('calculator') }}" method="POST" style="flex:1;">
+                    <input type="hidden" name="action" value="export_calc">
+                    <input type="hidden" name="distance_val" value="{{ result.distance }}">
+                    <input type="hidden" name="fuel_needed_val" value="{{ result.fuel_needed }}">
+                    <input type="hidden" name="total_cost_val" value="{{ result.total_cost }}">
+                    <input type="hidden" name="cost_km_val" value="{{ result.cost_per_km }}">
+                    <input type="hidden" name="cost_pass_val" value="{{ result.cost_per_passenger }}">
+                    <button type="submit" class="btn btn-outline" style="width:100%;"><i
+                            class="fa-solid fa-file-csv"></i> Export CSV</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>Fill out the details on the left and click calculate to see your fuel cost estimate.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

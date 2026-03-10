@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page active" id="page-history">
+    <div class="page-header">
+        <h1>Expense History</h1>
+        <p class="page-subtitle">Track your fuel purchases and saved calculations.</p>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+        <h3><i class="fa-solid fa-plus"></i> Add Fuel Log</h3>
+        <!-- No JS dropdown filling anymore, using server rendered dropdown -->
+        <form method="POST" action="{{ url_for('history') }}">
+            <input type="hidden" name="action" value="add_log">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="date" required value="{{ now.strftime('%Y-%m-%d') }}">
+                </div>
+                <div class="form-group">
+                    <label>Litres Filled</label>
+                    <input type="number" step="0.1" name="litres" required placeholder="Ex: 25.5">
+                </div>
+                <div class="form-group">
+                    <label>Price per Litre</label>
+                    <input type="number" step="0.01" name="price" required placeholder="Ex: 104.5">
+                </div>
+                <div class="form-group">
+                    <label>Odometer (km)</label>
+                    <input type="number" step="1" name="odometer" placeholder="Ex: 45000">
+                </div>
+                <div class="form-group">
+                    <label>Vehicle Profile</label>
+                    <select name="vehicle">
+                        <option value="">— Optional —</option>
+                        {% for v in vehicles %}
+                        <option value="{{ v.id }}">{{ v.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" name="notes" placeholder="Ex: Shell Highway Station">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-plus"></i>
+                Save Log</button>
+        </form>
+    </div>
+
+    <div class="dashboard-bottom-row">
+        <!-- Logs List -->
+        <div class="card">
+            <h3><i class="fa-solid fa-gas-pump"></i> Fuel Purchase Logs</h3>
+            <div class="history-list">
+                {% if logs %}
+                {% for l in logs %}
+                <div class="history-entry">
+                    <div class="he-info">
+                        <span class="he-title">{{ l.litres|round(1) }} L @ {{ format_currency(l.price) }}/L</span>
+                        <span class="he-detail">
+                            {{ l.date }}
+                            {% if l.vehicleId in vmap %}
+                            · {{ vmap[l.vehicleId] }}
+                            {% endif %}
+                            {% if l.notes %}
+                            · {{ l.notes }}
+                            {% endif %}
+                            {% if l.odometer %}
+                            · {{ l.odometer|round|int }} km
+                            {% endif %}
+                        </span>
+                    </div>
+                    <span class="he-amount">{{ format_currency(l.total_cost) }}</span>
+                    <div class="he-actions">
+                        <form method="POST" action="{{ url_for('history') }}" style="margin:0;">
+                            <input type="hidden" name="action" value="delete_log">
+                            <input type="hidden" name="log_id" value="{{ l.id }}">
+                            <button type="submit"
+                                style="background:none; border:none; color:var(--text-muted); padding:4px; font-size:0.9rem; cursor:pointer;"
+                                onclick="return confirm('Delete this log?');"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="empty-state">No fuel logs found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Saved Calculations -->
+        <div class="card">
+            <h3><i class="fa-solid fa-calculator"></i> Saved Calculations</h3>
+            <div class="history-list">
+                {% if calcs %}
+                {% for c in calcs %}
+                <div class="history-entry">
+                    <div class="he-info">
+                        <span class="he-title">{{ c.distance }} km · {{ c.fuel_needed|round(1) }} L</span>
+                        <span class="he-detail">{{ c.date }} · {{ c.trip_type|capitalize }}</span>
+                    </div>
+                    <span class="he-amount">{{ format_currency(c.total_cost) }}</span>
+                    <div class="he-actions">
+                        <form method="POST" action="{{ url_for('history') }}" style="margin:0;">
+                            <input type="hidden" name="action" value="delete_calc">
+                            <input type="hidden" name="calc_id" value="{{ c.id }}">
+                            <button type="submit"
+                                style="background:none; border:none; color:var(--text-muted); padding:4px; font-size:0.9rem; cursor:pointer;"
+                                onclick="return confirm('Delete this calculation?');"><i
+                                    class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="empty-state">No saved calculations yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
