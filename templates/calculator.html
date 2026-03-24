@@ -2,6 +2,20 @@
 
 {% block content %}
 <div class="page active" id="page-calculator">
+    {% set selected_v = None %}
+    {% set form_v_id = form.get('vehicle_id') %}
+    {% if form_v_id %}
+        {% for v in vehicles %}
+            {% if v.id == form_v_id %}
+                {% set selected_v = v %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% set fuel_type = 'Petrol' %}
+    {% if selected_v %}
+        {% set fuel_type = selected_v.get('fuelType', 'Petrol') %}
+    {% endif %}
+
     <div class="page-header">
         <h1>Fuel Calculator</h1>
         <p class="page-subtitle">Estimate fuel costs instantly.</p>
@@ -23,36 +37,24 @@
                     <select name="vehicle_id" onchange="document.getElementById('calcAction').value='refresh'; this.form.submit();">
                         <option value="">— Select a Vehicle —</option>
                         {% for v in vehicles %}
-                        <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
+                        <option value="{{ v.id }}" {% if form_v_id == v.id %}selected{% endif %}>{{ v.name }}
                             ({{ v.mileage }} {% if v.get('fuelType', 'Petrol') == 'EV' %}km/kWh{% elif v.get('fuelType') == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-group">
-                    {% set selected_v = None %}
-                    {% if form.get('vehicle_id') %}
-                        {% for v in vehicles %}
-                            {% if v.id == form.get('vehicle_id') %}
-                                {% set selected_v = v %}
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
                     <label>
-                        {% if selected_v %}
-                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}Efficiency (km/kWh)
-                            {% elif selected_v.get('fuelType') == 'CNG' %}Avg. Mileage (km/kg)
-                            {% else %}Avg. Mileage (km/L){% endif %}
-                        {% else %}
-                            Mileage (km/L)
-                        {% endif %}
+                        {% if fuel_type == 'EV' %}Efficiency (km/kWh)
+                        {% elif fuel_type == 'CNG' %}Avg. Mileage (km/kg)
+                        {% else %}Mileage (km/L){% endif %}
                     </label>
                     {% set auto_mpg = form.get('mileage', '') %}
                     <input type="number" step="0.1" name="mileage" value="{{ auto_mpg }}" placeholder="Ex: 15">
                 </div>
                 <div class="form-group">
                     <label>
-                        {% if selected_v and selected_v.get('fuelType', 'Petrol') == 'EV' %}Electricity Price (per kWh)
-                        {% elif selected_v and selected_v.get('fuelType') == 'CNG' %}Fuel Price (per kg)
+                        {% if fuel_type == 'EV' %}Electricity Price (per kWh)
+                        {% elif fuel_type == 'CNG' %}Fuel Price (per kg)
                         {% else %}Fuel Price (per L){% endif %}
                     </label>
                     <input type="number" step="0.01" name="fuel_price" value="{{ form.get('fuel_price', '') }}" required
@@ -125,9 +127,7 @@
                 <div class="result-item">
                     <span class="r-label">Fuel Required</span>
                     <span class="r-value" id="resultFuel">{{ result.fuel_needed|round(2) }}
-                        {% if selected_v %}
-                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh{% elif selected_v.get('fuelType') == 'CNG' %}kg{% else %}L{% endif %}
-                        {% else %}L{% endif %}
+                        {% if fuel_type == 'EV' %}kWh{% elif fuel_type == 'CNG' %}kg{% else %}L{% endif %}
                     </span>
                 </div>
                 <div class="result-item">
@@ -150,9 +150,7 @@
                 <div class="result-item">
                     <span class="r-label">Consumption</span>
                     <span class="r-value" id="resultConsumption">{{ result.consumption|round(1) }} 
-                        {% if selected_v %}
-                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh/100km{% elif selected_v.get('fuelType') == 'CNG' %}kg/100km{% else %}L/100km{% endif %}
-                        {% else %}L/100km{% endif %}
+                        {% if fuel_type == 'EV' %}kWh/100km{% elif fuel_type == 'CNG' %}kg/100km{% else %}L/100km{% endif %}
                     </span>
                 </div>
             </div>
