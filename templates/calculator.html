@@ -39,8 +39,8 @@
                     {% endif %}
                     <label>
                         {% if selected_v %}
-                            {% if selected_v.fuelType == 'EV' %}Efficiency (km/kWh)
-                            {% elif selected_v.fuelType == 'CNG' %}Avg. Mileage (km/kg)
+                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}Efficiency (km/kWh)
+                            {% elif selected_v.get('fuelType') == 'CNG' %}Avg. Mileage (km/kg)
                             {% else %}Avg. Mileage (km/L){% endif %}
                         {% else %}
                             Mileage (km/L)
@@ -51,8 +51,8 @@
                 </div>
                 <div class="form-group">
                     <label>
-                        {% if selected_v and selected_v.fuelType == 'EV' %}Electricity Price (per kWh)
-                        {% elif selected_v and selected_v.fuelType == 'CNG' %}Fuel Price (per kg)
+                        {% if selected_v and selected_v.get('fuelType', 'Petrol') == 'EV' %}Electricity Price (per kWh)
+                        {% elif selected_v and selected_v.get('fuelType') == 'CNG' %}Fuel Price (per kg)
                         {% else %}Fuel Price (per L){% endif %}
                     </label>
                     <input type="number" step="0.01" name="fuel_price" value="{{ form.get('fuel_price', '') }}" required
@@ -139,7 +139,7 @@
                     <span class="r-label">Consumption</span>
                     <span class="r-value" id="resultConsumption">{{ result.consumption|round(1) }} 
                         {% if selected_v %}
-                            {% if selected_v.fuelType == 'EV' %}kWh/100km{% elif selected_v.fuelType == 'CNG' %}kg/100km{% else %}L/100km{% endif %}
+                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh/100km{% elif selected_v.get('fuelType') == 'CNG' %}kg/100km{% else %}L/100km{% endif %}
                         {% else %}L/100km{% endif %}
                     </span>
                 </div>
@@ -179,6 +179,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             {% if result.budget and result.monthly_cost > result.budget %}
             <div class="budget-alert slide-up" id="budgetAlert">
