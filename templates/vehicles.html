@@ -29,7 +29,7 @@
                 </div>
                 <div class="form-group">
                     <label>Fuel Type</label>
-                    <select name="fuelType" onchange="this.form.action='{{ url_for('vehicles') }}'; this.form.submit();">
+                    <select name="fuelType" onchange='this.form.action="{{ url_for("vehicles") }}"; this.form.submit();'>
                         <option value="Petrol" {% if selected_fuel == 'Petrol' %}selected{% endif %}>Petrol</option>
                         <option value="Diesel" {% if selected_fuel == 'Diesel' %}selected{% endif %}>Diesel</option>
                         <option value="CNG" {% if selected_fuel == 'CNG' %}selected{% endif %}>CNG</option>

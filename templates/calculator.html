@@ -95,12 +95,18 @@
         <div class="card" id="calcResults">
             {% if result %}
             <h3><i class="fa-solid fa-square-poll-vertical"></i> Results</h3>
-            <div class="result-hero" id="resultHero"
-                style="background: linear-gradient(135deg, {% if result.total_cost < 500 %}#10b981, #059669{% elif result.total_cost < 2000 %}#f59e0b, #d97706{% else %}#ef4444, #dc2626{% endif %})">
+            {% set hero_color = '#ef4444, #dc2626' %}
+            {% if result.total_cost < 500 %}{% set hero_color = '#10b981, #059669' %}
+            {% elif result.total_cost < 2000 %}{% set hero_color = '#f59e0b, #d97706' %}{% endif %}
+            {% if result.distance > (form.get('distance', 0)|float) %}{% set rt_label = '(round trip)' %}{% else %}{% set rt_label = '' %}{% endif %}
+            
+            <style>
+                .result-hero.dynamic-bg { background: linear-gradient(135deg, {{ hero_color }}); }
+            </style>
+            <div class="result-hero dynamic-bg" id="resultHero">
                 <span class="result-label">ESTIMATED TOTAL COST</span>
                 <span class="result-price" id="resultPrice">{{ format_currency(result.total_cost) }}</span>
-                <span class="result-sub" id="resultDistance">for {{ result.distance|round|int }} km {% if
-                    result.distance > (form.get('distance', 0)|float) %}(round trip){% endif %}</span>
+                <span class="result-sub" id="resultDistance">for {{ result.distance|round|int }} km {{ rt_label }}</span>
             </div>
 
             <div class="result-grid slide-up delay-1">
@@ -173,7 +179,6 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
 
             {% if result.budget and result.monthly_cost > result.budget %}
             <div class="budget-alert slide-up" id="budgetAlert">
