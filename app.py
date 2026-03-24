@@ -24,10 +24,39 @@ def ensure_session_defaults():
         
     if "vehicles" not in session:
         session["vehicles"] = []
+    else:
+        # Migration: Ensure all vehicles have new required keys
+        modified = False
+        for v in session["vehicles"]:
+            if "vehicleType" not in v:
+                v["vehicleType"] = v.pop("type", "car")
+                modified = True
+            if "fuelType" not in v:
+                v["fuelType"] = "Petrol"
+                modified = True
+            if "batteryRange" not in v:
+                v["batteryRange"] = v.get("tankSize", 0) if v["fuelType"] == "EV" else 0
+                modified = True
+            if "id" not in v:
+                v["id"] = str(uuid.uuid4())
+                modified = True
+        if modified:
+            session.modified = True
+
     if "fuel_logs" not in session:
         session["fuel_logs"] = []
     if "calc_history" not in session:
         session["calc_history"] = []
+    else:
+        # Migration: Ensure all history entries have a unit
+        modified = False
+        for c in session["calc_history"]:
+            if "unit" not in c:
+                c["unit"] = "L"
+                modified = True
+        if modified:
+            session.modified = True
+            
     if "trips" not in session:
         session["trips"] = []
 

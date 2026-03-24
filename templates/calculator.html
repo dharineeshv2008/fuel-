@@ -24,7 +24,7 @@
                         <option value="">— Select a Vehicle —</option>
                         {% for v in vehicles %}
                         <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
-                            ({{ v.mileage }} {% if v.fuelType == 'EV' %}km/kWh{% elif v.fuelType == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
+                            ({{ v.mileage }} {% if v.get('fuelType', 'Petrol') == 'EV' %}km/kWh{% elif v.get('fuelType') == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -108,7 +108,7 @@
                     <span class="r-label">Fuel Required</span>
                     <span class="r-value" id="resultFuel">{{ result.fuel_needed|round(2) }}
                         {% if selected_v %}
-                            {% if selected_v.fuelType == 'EV' %}kWh{% elif selected_v.fuelType == 'CNG' %}kg{% else %}L{% endif %}
+                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh{% elif selected_v.get('fuelType') == 'CNG' %}kg{% else %}L{% endif %}
                         {% else %}L{% endif %}
                     </span>
                 </div>
@@ -191,7 +191,7 @@
                     <input type="hidden" name="total_cost_val" value="{{ result.total_cost }}">
                     <input type="hidden" name="trip_type_val"
                         value="{{ 'Round Trip' if form.get('trip_type') == 'round-trip' else 'One Way' }}">
-                    <input type="hidden" name="unit_val" value="{% if selected_v %}{% if selected_v.fuelType == 'EV' %}kWh{% elif selected_v.fuelType == 'CNG' %}kg{% else %}L{% endif %}{% else %}L{% endif %}">
+                    <input type="hidden" name="unit_val" value="{% if selected_v %}{% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh{% elif selected_v.get('fuelType') == 'CNG' %}kg{% else %}L{% endif %}{% else %}L{% endif %}">
                     <button type="submit" class="btn btn-outline" style="width:100%;"><i
                             class="fa-solid fa-floppy-disk"></i> Save to History</button>
                 </form>

@@ -22,12 +22,28 @@
                         <option value="">— Select a Vehicle —</option>
                         {% for v in vehicles %}
                         <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
-                            ({{ v.mileage }} km/L)</option>
+                            ({{ v.mileage }} {% if v.get('fuelType', 'Petrol') == 'EV' %}km/kWh{% elif v.get('fuelType') == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Mileage (km/L)</label>
+                    {% set selected_v = None %}
+                    {% if form.get('vehicle_id') %}
+                        {% for v in vehicles %}
+                            {% if v.id == form.get('vehicle_id') %}
+                                {% set selected_v = v %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    <label>
+                        {% if selected_v %}
+                            {% if selected_v.get('fuelType', 'Petrol') == 'EV' %}Efficiency (km/kWh)
+                            {% elif selected_v.get('fuelType') == 'CNG' %}Avg. Mileage (km/kg)
+                            {% else %}Avg. Mileage (km/L){% endif %}
+                        {% else %}
+                            Mileage (km/L)
+                        {% endif %}
+                    </label>
                     {% set auto_mpg = form.get('mileage', '') %}
                     {% set auto_tank = form.get('tank_size', '45') %}
                     {% if form.get('vehicle_id') %}
@@ -46,7 +62,11 @@
                         placeholder="Current cost">
                 </div>
                 <div class="form-group">
-                    <label>Tank Size (L)</label>
+                    <label>
+                        {% if selected_v and selected_v.get('fuelType', 'Petrol') == 'EV' %}Battery Capacity (kWh)
+                        {% elif selected_v and selected_v.get('fuelType') == 'CNG' %}Tank Capacity (kg)
+                        {% else %}Tank Size (L){% endif %}
+                    </label>
                     <input type="number" step="1" name="tank_size" value="{{ auto_tank }}" required>
                 </div>
                 <div class="form-group">
