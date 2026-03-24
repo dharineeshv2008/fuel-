@@ -11,7 +11,7 @@
     <div class="card slide-up">
         <h3><i class="fa-solid fa-plus"></i> Add New Vehicle</h3>
         <form id="addVehicleForm" method="POST" action="{{ url_for('vehicles') }}">
-            <input type="hidden" name="action" value="add">
+            <input type="hidden" name="action" value="add" id="vehicleAction">
             {% set selected_fuel = request.form.get('fuelType', 'Petrol') %}
             <div class="form-grid">
                 <div class="form-group">
@@ -35,7 +35,7 @@
                 <div class="form-group">
                     <label>Fuel Type</label>
                     {% set vehicles_submit_url = url_for('vehicles') %}
-                    <select name="fuelType" onchange="this.form.action='{{ vehicles_submit_url }}'; this.form.submit();">
+                    <select name="fuelType" onchange="document.getElementById('vehicleAction').value='refresh'; this.form.submit();">
                         <option value="Petrol" {% if selected_fuel=='Petrol' %}selected{% endif %}>Petrol</option>
                         <option value="Diesel" {% if selected_fuel=='Diesel' %}selected{% endif %}>Diesel</option>
                         <option value="CNG" {% if selected_fuel=='CNG' %}selected{% endif %}>CNG</option>

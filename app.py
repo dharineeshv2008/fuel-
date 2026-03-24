@@ -275,6 +275,7 @@ def vehicles():
             
             if not is_valid:
                 flash(error_msg, "error")
+                return render_template("vehicles.html", vehicles=session["vehicles"])
             else:
                 v = {
                     "id": str(uuid.uuid4()),
@@ -296,6 +297,8 @@ def vehicles():
             session.modified = True
             flash("Vehicle removed.", "info")
             
+        if action in ["refresh", "add"]:
+            return render_template("vehicles.html", vehicles=session["vehicles"])
         return redirect(url_for("vehicles"))
         
     return render_template("vehicles.html", vehicles=session["vehicles"])
