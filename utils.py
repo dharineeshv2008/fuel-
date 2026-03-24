@@ -2,17 +2,22 @@ import random
 
 # Core Calculation Logic
 
-def get_efficiency_rating(mileage):
-    """Return an efficiency rating string based on km/L."""
-    if mileage >= 25:
-        return "Super Efficient 🍃"
-    if mileage >= 18:
-        return "Great Mileage ✨"
-    if mileage >= 12:
-        return "Average Economy 🚗"
-    return "Heavy Consumer ⛽"
+def get_efficiency_rating(mileage, fuel_type="Petrol"):
+    """Return an efficiency rating string based on mileage/efficiency."""
+    if fuel_type == "EV":
+        # For EV, km/kWh: > 7 is excellent, > 5 is great, > 3 is average
+        if mileage >= 7: return "Super Efficient 🍃"
+        if mileage >= 5: return "Great Efficiency ✨"
+        if mileage >= 3: return "Average Economy 🚗"
+        return "Heavy Consumer 🔋"
+    else:
+        # km/L
+        if mileage >= 25: return "Super Efficient 🍃"
+        if mileage >= 18: return "Great Mileage ✨"
+        if mileage >= 12: return "Average Economy 🚗"
+        return "Heavy Consumer ⛽"
 
-def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_km):
+def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_km, fuel_type="Petrol"):
     """
     Calculate essential fuel metrics and budget projections.
     Returns a dictionary of calculated metrics.
@@ -29,9 +34,19 @@ def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_k
     cost_per_km = total_cost / actual_distance
     cost_per_passenger = total_cost / passengers
     
-    # 2.31 kg of CO2 per litre of petrol/diesel (avg)
-    co2_emissions = fuel_needed * 2.31
-    consumption = (fuel_needed / actual_distance) * 100 # L/100km
+    # CO2 Emissions based on fuel type
+    # Petrol: ~2.31 kg/L, Diesel: ~2.68 kg/L, CNG: ~2.0 kg/kg, EV: 0 (direct)
+    if fuel_type == "Petrol":
+        co2_factor = 2.31
+    elif fuel_type == "Diesel":
+        co2_factor = 2.68
+    elif fuel_type == "CNG":
+        co2_factor = 2.0
+    else: # EV
+        co2_factor = 0
+        
+    co2_emissions = fuel_needed * co2_factor
+    consumption = (fuel_needed / actual_distance) * 100 # L/100km or unit/100km
     
     # Wear and tear estimate (avg 0.15 per km excluding fuel)
     wear_tear = actual_distance * 0.15
@@ -57,7 +72,7 @@ def calculate_fuel(distance, mileage, fuel_price, trip_type, passengers, daily_k
         "total_cost": total_cost,
         "cost_per_km": cost_per_km,
         "cost_per_passenger": cost_per_passenger,
-        "rating": get_efficiency_rating(mileage),
+        "rating": get_efficiency_rating(mileage, fuel_type),
         "co2": co2_emissions,
         "consumption": consumption,
         "monthly_cost": monthly_cost,

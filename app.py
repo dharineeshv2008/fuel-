@@ -103,7 +103,8 @@ def calculator():
                     "distance": float(request.form.get("distance_val", 0)),
                     "fuel_needed": float(request.form.get("fuel_needed_val", 0)),
                     "total_cost": float(request.form.get("total_cost_val", 0)),
-                    "trip_type": request.form.get("trip_type_val", "")
+                    "trip_type": request.form.get("trip_type_val", ""),
+                    "unit": request.form.get("unit_val", "L")
                 }
                 session["calc_history"].insert(0, calc_data)
                 session.modified = True
@@ -126,23 +127,43 @@ def calculator():
                 return Response(generate(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=fuel_calculation.csv"})
 
             # Handle normal calculation
-            dist = float(request.form.get("distance") or 0)
-            mpg = float(request.form.get("mileage") or 0)
-            price = float(request.form.get("fuel_price") or 0)
+            dist_str = request.form.get("distance") or "0"
+            mileage_str = request.form.get("mileage") or "0"
+            price_str = request.form.get("fuel_price") or "0"
+            dist = float(dist_str)
+            price = float(price_str)
+            
+            # Fetch from vehicle if mileage is empty
+            vehicle_id = request.form.get("vehicle_id")
+            effective_mileage = float(mileage_str)
+            fuel_type = "Petrol"
+            
+            if vehicle_id:
+                for v in session["vehicles"]:
+                    if v["id"] == vehicle_id:
+                        fuel_type = v.get("fuelType", "Petrol")
+                        if effective_mileage <= 0:
+                            effective_mileage = v["mileage"]
+                        break
+            
             trip_type = request.form.get("trip_type", "one-way")
             passengers = float(request.form.get("passengers") or 1)
             daily_km = float(request.form.get("daily_km") or 0)
             budget = float(request.form.get("budget") or 0)
             
-            # Form defaults persistence
+            # Form data for persistence
             form_data = request.form.to_dict()
+            if not form_data.get("mileage") and effective_mileage > 0:
+                 form_data["mileage"] = str(effective_mileage)
+
+            if dist <= 0 or effective_mileage <= 0 or price <= 0:
+                raise ValueError("Distance, Mileage, and Fuel Price must be greater than zero.")
             
-            result = calculate_fuel(dist, mpg, price, trip_type, passengers, daily_km)
+            result = calculate_fuel(dist, effective_mileage, price, trip_type, passengers, daily_km, fuel_type)
             result["budget"] = budget
             
             flash("Calculation complete!", "success")
             return render_template("calculator.html", vehicles=session["vehicles"], result=result, form=form_data)
-            
         except ValueError as e:
             flash(str(e), "error")
             return render_template("calculator.html", vehicles=session["vehicles"], form=request.form.to_dict())
@@ -154,13 +175,30 @@ def trip_planner():
     result = None
     if request.method == "POST":
         try:
-            dist = float(request.form.get("total_dist") or 0)
-            mpg = float(request.form.get("mileage") or 0)
-            price = float(request.form.get("fuel_price") or 0)
+            dist_str = request.form.get("total_dist") or "0"
+            mileage_str = request.form.get("mileage") or "0"
+            price_str = request.form.get("fuel_price") or "0"
+            
+            dist = float(dist_str)
+            price = float(price_str)
+            
+            # Fetch from vehicle if mileage is empty
+            vehicle_id = request.form.get("vehicle_id")
+            effective_mileage = float(mileage_str)
+            
+            if effective_mileage <= 0 and vehicle_id:
+                for v in session["vehicles"]:
+                    if v["id"] == vehicle_id:
+                        effective_mileage = v["mileage"]
+                        break
+            
             tank = float(request.form.get("tank_size") or 45)
             speed = float(request.form.get("speed") or 60)
             
-            result = plan_trip(dist, mpg, price, tank, speed)
+            if dist <= 0 or effective_mileage <= 0 or price <= 0:
+                raise ValueError("Distance, Mileage, and Fuel Price must be greater than zero.")
+            
+            result = plan_trip(dist, effective_mileage, price, tank, speed)
             flash("Trip planned successfully!", "success")
             return render_template("trip.html", vehicles=session["vehicles"], result=result, form=request.form.to_dict())
             
@@ -176,18 +214,49 @@ def vehicles():
         action = request.form.get("action")
         
         if action == "add":
-            v = {
-                "id": str(uuid.uuid4()),
-                "name": request.form.get("name", "").strip(),
-                "type": request.form.get("type", "car"),
-                "mileage": float(request.form.get("mileage", 0)),
-                "fuelType": request.form.get("fuelType", "Petrol"),
-                "tankSize": float(request.form.get("tankSize", 45) or 45),
-                "year": request.form.get("year", "").strip()
-            }
-            if not v["name"] or v["mileage"] <= 0:
-                flash("Enter a valid vehicle name and mileage.", "error")
+            fuel_type = request.form.get("fuelType", "Petrol")
+            mileage = float(request.form.get("mileage", 0) or 0)
+            tank_size = float(request.form.get("tankSize", 0) or 0)
+            name = request.form.get("name", "").strip()
+            
+            # Validation logic based on fuel type
+            is_valid = True
+            error_msg = ""
+            
+            if not name:
+                is_valid = False
+                error_msg = "Vehicle name is required."
+            elif fuel_type in ["Petrol", "Diesel"]:
+                if mileage <= 0:
+                    is_valid = False
+                    error_msg = "Mileage must be greater than 0 for Petrol/Diesel vehicles."
+                elif tank_size <= 0:
+                    is_valid = False
+                    error_msg = "Tank size must be greater than 0 for Petrol/Diesel vehicles."
+            elif fuel_type == "EV":
+                if mileage <= 0:
+                    is_valid = False
+                    error_msg = "Efficiency (km/kWh) must be greater than 0 for EV."
+                # tankSize (Battery) is optional for EV
+            elif fuel_type == "CNG":
+                if mileage <= 0:
+                    is_valid = False
+                    error_msg = "Mileage must be greater than 0 for CNG vehicles."
+                # tankSize is optional for CNG
+            
+            if not is_valid:
+                flash(error_msg, "error")
             else:
+                v = {
+                    "id": str(uuid.uuid4()),
+                    "name": name,
+                    "vehicleType": request.form.get("type", "car"),
+                    "mileage": mileage,
+                    "fuelType": fuel_type,
+                    "tankSize": tank_size if fuel_type != "EV" else 0,
+                    "batteryRange": tank_size if fuel_type == "EV" else 0,
+                    "year": request.form.get("year", "").strip()
+                }
                 session["vehicles"].append(v)
                 session.modified = True
                 flash(f"Vehicle '{v['name']}' added!", "success")

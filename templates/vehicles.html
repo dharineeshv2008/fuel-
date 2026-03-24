@@ -12,43 +12,52 @@
         <h3><i class="fa-solid fa-plus"></i> Add New Vehicle</h3>
         <form id="addVehicleForm" method="POST" action="{{ url_for('vehicles') }}">
             <input type="hidden" name="action" value="add">
+            {% set selected_fuel = request.form.get('fuelType', 'Petrol') %}
             <div class="form-grid">
                 <div class="form-group">
                     <label>Vehicle Name</label>
-                    <input type="text" name="name" required placeholder="Ex: Honda City">
+                    <input type="text" name="name" value="{{ request.form.get('name', '') }}" required placeholder="Ex: Honda City">
                 </div>
                 <div class="form-group">
                     <label>Vehicle Type</label>
                     <select name="type">
-                        <option value="car">Car / Sedan</option>
-                        <option value="suv">SUV / Truck</option>
-                        <option value="bike">Motorcycle</option>
-                        <option value="other">Other</option>
+                        <option value="car" {% if request.form.get('type') == 'car' %}selected{% endif %}>Car / Sedan</option>
+                        <option value="suv" {% if request.form.get('type') == 'suv' %}selected{% endif %}>SUV / Truck</option>
+                        <option value="bike" {% if request.form.get('type') == 'bike' %}selected{% endif %}>Motorcycle</option>
+                        <option value="other" {% if request.form.get('type') == 'other' %}selected{% endif %}>Other</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label>Avg. Mileage (km/L)</label>
-                    <input type="number" step="0.1" name="mileage" required placeholder="Ex: 18">
                 </div>
                 <div class="form-group">
                     <label>Fuel Type</label>
-                    <select name="fuelType">
-                        <option value="Petrol">Petrol</option>
-                        <option value="Diesel">Diesel</option>
-                        <option value="CNG">CNG</option>
-                        <option value="EV">Electric (EV)</option>
+                    <select name="fuelType" onchange="this.form.action='{{ url_for('vehicles') }}'; this.form.submit();">
+                        <option value="Petrol" {% if selected_fuel == 'Petrol' %}selected{% endif %}>Petrol</option>
+                        <option value="Diesel" {% if selected_fuel == 'Diesel' %}selected{% endif %}>Diesel</option>
+                        <option value="CNG" {% if selected_fuel == 'CNG' %}selected{% endif %}>CNG</option>
+                        <option value="EV" {% if selected_fuel == 'EV' %}selected{% endif %}>Electric (EV)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Tank Size (L)</label>
-                    <input type="number" step="1" name="tankSize" value="45">
+                    <label>
+                        {% if selected_fuel == 'EV' %}Efficiency (km/kWh)
+                        {% elif selected_fuel == 'CNG' %}Avg. Mileage (km/kg)
+                        {% else %}Avg. Mileage (km/L){% endif %}
+                    </label>
+                    <input type="number" step="0.1" name="mileage" value="{{ request.form.get('mileage', '') }}" placeholder="Ex: {% if selected_fuel == 'EV' %}6.5{% else %}18{% endif %}">
+                </div>
+                <div class="form-group">
+                    <label>
+                        {% if selected_fuel == 'EV' %}Battery Capacity (kWh)
+                        {% elif selected_fuel == 'CNG' %}Tank Capacity (kg)
+                        {% else %}Tank Size (L){% endif %}
+                    </label>
+                    <input type="number" step="1" name="tankSize" value="{{ request.form.get('tankSize', '45' if selected_fuel in ['Petrol', 'Diesel'] else '') }}">
                 </div>
                 <div class="form-group">
                     <label>Year (Optional)</label>
-                    <input type="number" min="1990" max="2030" step="1" name="year" placeholder="Ex: 2022">
+                    <input type="number" min="1990" max="2030" step="1" name="year" value="{{ request.form.get('year', '') }}" placeholder="Ex: 2022">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-check"></i>
+            <button type="submit" name="action" value="add" class="btn btn-primary" style="margin-top: 10px;"><i class="fa-solid fa-check"></i>
                 Add Vehicle</button>
         </form>
     </div>
@@ -61,17 +70,21 @@
             <div class="vc-header">
                 <div class="vc-icon">
                     <i
-                        class="fa-solid {% if v.type == 'bike' %}fa-motorcycle{% elif v.type == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
+                        class="fa-solid {% if v.vehicleType == 'bike' %}fa-motorcycle{% elif v.vehicleType == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
                 </div>
                 <div>
                     <div class="vc-name">{{ v.name }}</div>
-                    <div class="vc-type">{{ v.type }}</div>
+                    <div class="vc-type">{{ v.vehicleType|capitalize }}</div>
                 </div>
             </div>
             <div class="vc-details">
-                <span class="vc-tag">⛽ {{ v.mileage }} km/L</span>
+                <span class="vc-tag">⛽ {{ v.mileage }} {% if v.fuelType == 'EV' %}km/kWh{% elif v.fuelType == 'CNG' %}km/kg{% else %}km/L{% endif %}</span>
                 <span class="vc-tag">🛢️ {{ v.fuelType }}</span>
-                <span class="vc-tag">📦 {{ v.tankSize|round|int }} L tank</span>
+                {% if v.fuelType == 'EV' and v.batteryRange > 0 %}
+                <span class="vc-tag">📦 {{ v.batteryRange|round|int }} kWh</span>
+                {% elif v.tankSize > 0 %}
+                <span class="vc-tag">📦 {{ v.tankSize|round|int }} {% if v.fuelType == 'CNG' %}kg{% else %}L{% endif %}</span>
+                {% endif %}
                 {% if v.year %}
                 <span class="vc-tag">📅 {{ v.year }}</span>
                 {% endif %}

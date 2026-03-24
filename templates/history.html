@@ -97,7 +97,7 @@
                 {% for c in calcs %}
                 <div class="history-entry">
                     <div class="he-info">
-                        <span class="he-title">{{ c.distance }} km · {{ c.fuel_needed|round(1) }} L</span>
+                        <span class="he-title">{{ c.distance|round|int }} km · {{ c.fuel_needed|round(1) }} {{ c.unit|default('L') }}</span>
                         <span class="he-detail">{{ c.date }} · {{ c.trip_type|capitalize }}</span>
                     </div>
                     <span class="he-amount">{{ format_currency(c.total_cost) }}</span>
