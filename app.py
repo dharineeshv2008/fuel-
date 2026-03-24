@@ -183,7 +183,11 @@ def calculator():
             # Form data for persistence
             form_data = request.form.to_dict()
             if not form_data.get("mileage") and effective_mileage > 0:
-                 form_data["mileage"] = str(effective_mileage)
+                form_data["mileage"] = str(effective_mileage)
+
+            if action == "refresh":
+                # Skip calculation validation, just update the form with mileage
+                return render_template("calculator.html", vehicles=session["vehicles"], form=form_data)
 
             if dist <= 0 or effective_mileage <= 0 or price <= 0:
                 raise ValueError("Distance, Mileage, and Fuel Price must be greater than zero.")
@@ -195,7 +199,8 @@ def calculator():
             return render_template("calculator.html", vehicles=session["vehicles"], result=result, form=form_data)
         except ValueError as e:
             flash(str(e), "error")
-            return render_template("calculator.html", vehicles=session["vehicles"], form=request.form.to_dict())
+            # Preserve the processed form_data (with filled-in mileage) on error
+            return render_template("calculator.html", vehicles=session["vehicles"], form=form_data if 'form_data' in locals() else request.form.to_dict())
 
     return render_template("calculator.html", vehicles=session["vehicles"], form={"fuel_price": session["default_price"]})
 

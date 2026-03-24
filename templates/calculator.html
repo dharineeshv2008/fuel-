@@ -9,7 +9,7 @@
 
     <div class="calc-layout">
         <form method="POST" action="{{ url_for('calculator') }}" id="calcForm" class="card">
-            <input type="hidden" name="action" value="calculate">
+            <input type="hidden" name="action" value="calculate" id="calcAction">
 
             <div class="form-grid">
                 <div class="form-group">
@@ -20,7 +20,7 @@
                 <!-- Vehicle Selector updates mileage logic via form submission -->
                 <div class="form-group">
                     <label>Vehicle Profile (Optional)</label>
-                    <select name="vehicle_id" onchange="this.form.submit()">
+                    <select name="vehicle_id" onchange="document.getElementById('calcAction').value='refresh'; this.form.submit();">
                         <option value="">— Select a Vehicle —</option>
                         {% for v in vehicles %}
                         <option value="{{ v.id }}" {% if form.get('vehicle_id')==v.id %}selected{% endif %}>{{ v.name }}
