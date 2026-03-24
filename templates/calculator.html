@@ -95,15 +95,27 @@
         <div class="card" id="calcResults">
             {% if result %}
             <h3><i class="fa-solid fa-square-poll-vertical"></i> Results</h3>
-            {% set hero_color = '#ef4444, #dc2626' %}
-            {% if result.total_cost < 500 %}{% set hero_color = '#10b981, #059669' %}
-            {% elif result.total_cost < 2000 %}{% set hero_color = '#f59e0b, #d97706' %}{% endif %}
-            {% if result.distance > (form.get('distance', 0)|float) %}{% set rt_label = '(round trip)' %}{% else %}{% set rt_label = '' %}{% endif %}
+            {% if result.total_cost < 500 %}
+                {% set hero_class = 'bg-low-cost' %}
+            {% elif result.total_cost < 2000 %}
+                {% set hero_class = 'bg-mid-cost' %}
+            {% else %}
+                {% set hero_class = 'bg-high-cost' %}
+            {% endif %}
+            
+            {% if result.distance > (form.get('distance', 0)|float) %}
+                {% set rt_label = '(round trip)' %}
+            {% else %}
+                {% set rt_label = '' %}
+            {% endif %}
             
             <style>
-                .result-hero.dynamic-bg { background: linear-gradient(135deg, {{ hero_color }}); }
+                .bg-low-cost { background: linear-gradient(135deg, #10b981, #059669) !important; }
+                .bg-mid-cost { background: linear-gradient(135deg, #f59e0b, #d97706) !important; }
+                .bg-high-cost { background: linear-gradient(135deg, #ef4444, #dc2626) !important; }
             </style>
-            <div class="result-hero dynamic-bg" id="resultHero">
+            
+            <div class="result-hero dynamic-bg {{ hero_class }}" id="resultHero">
                 <span class="result-label">ESTIMATED TOTAL COST</span>
                 <span class="result-price" id="resultPrice">{{ format_currency(result.total_cost) }}</span>
                 <span class="result-sub" id="resultDistance">for {{ result.distance|round|int }} km {{ rt_label }}</span>
