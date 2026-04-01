@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if it exists
+load_dotenv()
+
 import uuid
 import csv
 from datetime import datetime
@@ -59,10 +64,18 @@ def ensure_session_defaults():
             
     if "trips" not in session:
         session["trips"] = []
+        
+    if "user" not in session:
+        session["user"] = None # Stores {email, name} when logged in
 
 @app.before_request
 def before_request():
     ensure_session_defaults()
+    
+    # Simple route protection: redirect to login if not logged in and not on auth pages
+    auth_routes = ["login", "register", "static"]
+    if not session.get("user") and request.endpoint not in auth_routes and request.endpoint:
+        return redirect(url_for("login"))
 
 # Context processors to make data available to all templates
 @app.context_processor
@@ -71,8 +84,60 @@ def inject_globals():
         "theme": session.get("theme", "light"),
         "currency": session.get("currency", "₹"),
         "format_currency": lambda x: format_currency(x, session.get("currency", "₹")),
-        "now": datetime.now()
+        "now": datetime.now(),
+        "user": session.get("user")
     }
+
+# ----------------------------------------------------
+# AUTH ROUTES
+# ----------------------------------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("user"):
+        return redirect(url_for("dashboard"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        # As requested: "accept any email format and password"
+        if email and password:
+            session["user"] = {"email": email, "name": email.split("@")[0].capitalize()}
+            session.modified = True
+            flash(f"Welcome back, {session['user']['name']}!", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Please enter both email and password.", "error")
+            
+    return render_template("login.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if session.get("user"):
+        return redirect(url_for("dashboard"))
+        
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        if name and email and password:
+            session["user"] = {"email": email, "name": name}
+            session.modified = True
+            flash(f"Account created successfully! Welcome, {name}.", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("All fields are required.", "error")
+            
+    return render_template("register.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    session.modified = True
+    flash("You have been logged out.", "info")
+    return redirect(url_for("login"))
 
 # ----------------------------------------------------
 # PAGE ROUTES

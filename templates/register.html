@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card glass">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <h1>Create Account</h1>
+                <p>Join FuelWise today</p>
+            </div>
+
+            <form action="{{ url_for('register') }}" method="POST" class="auth-form" id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required autocomplete="name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required autocomplete="email">
+                    </div>
+                    <span class="error-message" id="emailError">Please enter a valid email address.</span>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="password" style="margin-bottom: 0;">Password</label>
+                    </div>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
+                        <button type="button" class="toggle-password" id="togglePassword" title="Show/Hide Password">
+                            <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <span class="error-message" id="passwordError">Password is required.</span>
+                </div>
+                
+
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <span>Register Now &rarr;</span>
+                    <div class="spinner"></div>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('registerForm');
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    const emailError = document.getElementById('emailError');
+    const passError = document.getElementById('passwordError');
+
+    const toggleBtn = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    // Password Toggle
+    toggleBtn.addEventListener('click', () => {
+        const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passInput.setAttribute('type', type);
+        eyeIcon.classList.toggle('fa-eye');
+        eyeIcon.classList.toggle('fa-eye-slash');
+    });
+
+    // Real-time Validation Function
+    const validateForm = () => {
+        let isValid = true;
+        const nameVal = nameInput.value.trim();
+        const emailVal = emailInput.value.trim();
+        const passVal = passInput.value.trim();
+
+        if (emailVal.length > 0 && !emailVal.includes('@')) {
+            emailInput.classList.add('error');
+            emailError.classList.add('active');
+            isValid = false;
+        } else {
+            emailInput.classList.remove('error');
+            emailError.classList.remove('active');
+        }
+
+        // Disable button if strictly empty
+        submitBtn.disabled = (nameVal === '' || emailVal === '' || passVal === '');
+
+        return isValid && nameVal !== '' && emailVal !== '' && passVal !== '';
+    };
+
+    nameInput.addEventListener('input', validateForm);
+    emailInput.addEventListener('input', validateForm);
+    passInput.addEventListener('input', validateForm);
+
+    // Initial check (in case browser auto-fills)
+    validateForm();
+
+    form.addEventListener('submit', (e) => {
+        if (!validateForm()) {
+            e.preventDefault();
+            return;
+        }
+
+        // Add loading state
+        submitBtn.classList.add('loading');
+        
+        // Artificial delay for premium UX
+        e.preventDefault();
+        setTimeout(() => {
+            form.submit();
+        }, 600);
+    });
+});
+</script>
+{% endblock %}

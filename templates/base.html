@@ -16,11 +16,13 @@
 
     <!-- App CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
 </head>
 
 <body>
 
     <!-- SIDEBAR NAV -->
+    {% if request.endpoint not in ['login', 'register'] %}
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -32,6 +34,18 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
+
+        {% if user %}
+        <div class="user-profile-sm">
+            <div class="user-avatar">
+                {{ user.name[0] | upper }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+            </div>
+        </div>
+        {% endif %}
 
         <nav class="sidebar-nav">
             <a href="{{ url_for('dashboard') }}"
@@ -60,20 +74,27 @@
         </nav>
 
         <div class="sidebar-footer">
-            <form action="{{ url_for('settings') }}" method="POST" style="margin: 0;">
-                <input type="hidden" name="action" value="save">
-                <input type="hidden" name="theme" value="{{ 'light' if theme == 'dark' else 'dark' }}">
-                <input type="hidden" name="currency" value="{{ currency }}">
-                <button type="submit" class="theme-toggle">
-                    {% if theme == 'dark' %}
-                    <i class="fa-solid fa-sun"></i><span>Light Mode</span>
-                    {% else %}
-                    <i class="fa-solid fa-moon"></i><span>Dark Mode</span>
-                    {% endif %}
-                </button>
-            </form>
+            <div class="footer-actions">
+                <form action="{{ url_for('settings') }}" method="POST" style="margin: 0; flex: 1;">
+                    <input type="hidden" name="action" value="save">
+                    <input type="hidden" name="theme" value="{{ 'light' if theme == 'dark' else 'dark' }}">
+                    <input type="hidden" name="currency" value="{{ currency }}">
+                    <button type="submit" class="theme-toggle" title="Toggle Theme">
+                        {% if theme == 'dark' %}
+                        <i class="fa-solid fa-sun"></i>
+                        {% else %}
+                        <i class="fa-solid fa-moon"></i>
+                        {% endif %}
+                    </button>
+                </form>
+                
+                <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
         </div>
     </aside>
+    {% endif %}
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 

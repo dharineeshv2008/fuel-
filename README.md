@@ -78,35 +78,75 @@ fuel-expense-calculator/
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Python 3.7+
+Follow these steps to get the Fuel Expense Calculator running on your local machine.
 
-### Installation & Execution
+### Prerequisites
+- Python 3.8 or higher
+- `pip` (Python package installer)
+
+### 1. Installation
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/dharineeshv2008/fuel-.git
 cd fuel-expense-calculator
 
-# 2. Install Flask
-pip install flask
+# Create a virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# 3. Run the application
-python app.py
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-### Open in browser
-Navigate to: `http://localhost:5000`
+### 2. Configuration
 
-### ☁️ Deploying to Vercel
-The project is completely configured for Vercel Serverless Functions out of the box.
-1. Create a free account on [Vercel](https://vercel.com/)
-2. Install the Vercel CLI: `npm i -g vercel`
-3. Run the following command in the project root:
+Professional applications use environment variables for sensitive data. 
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env  # On Windows: copy .env.example .env
+   ```
+2. Open `.env` and configure your `FLASK_SECRET_KEY`. You can generate a random key with:
+   ```bash
+   python -c "import secrets; print(secrets.token_hex())"
+   ```
+
+### 3. Running Locally
+
+We provide a dedicated `run.py` script for a seamless local hosting experience:
+
 ```bash
-vercel
+python run.py
 ```
-Vercel will detect the `vercel.json` and deploy your Flask app seamlessly.
+
+Navigate to: **`http://localhost:5000`** in your browser.
+
+---
+
+## 🛠️ Advanced Usage
+
+### Local Hosting with Gunicorn
+For a more production-like environment on Linux/Mac, you can use Gunicorn:
+```bash
+gunicorn -w 4 -b 0.0.0.0:5000 run:app
+```
+
+### Environment Variables
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `FLASK_SECRET_KEY` | Secret key for session encryption | (Development key) |
+| `PORT` | The port to run the application on | `5000` |
+| `FLASK_DEBUG` | Enable/Disable Flask debug mode | `1` (Enabled) |
+
+---
+
+## ☁️ Deployment to Vercel
+
+The project remains fully compatible with Vercel:
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run `vercel` in the project root.
+3. Vercel will use `api/index.py` and `vercel.json` for serverless deployment.
 
 ---
 
