@@ -1,133 +1,210 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | FuelWise - Smart Fuel Management</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Premium Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth_premium.css') }}">
+</head>
+<body>
 
-{% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-{% endblock %}
-
-{% block content %}
-<div class="auth-page">
-    <div class="auth-container">
-        <div class="auth-card glass">
-            <div class="auth-header">
-                <div class="auth-logo">
-                    <i class="fa-solid fa-user-plus"></i>
+    <div class="auth-wrapper">
+        <!-- Hero Section -->
+        <div class="auth-hero">
+            <img src="{{ url_for('static', filename='img/auth_hero.png') }}" alt="FuelWise Hero" class="auth-hero-img">
+            
+            <div class="auth-hero-content">
+                <div class="auth-hero-logo">
+                    <i class="fa-solid fa-gas-pump"></i>
+                    <span>FuelWise</span>
                 </div>
-                <h1>Create Account</h1>
-                <p>Join FuelWise today</p>
+                <h2>Join the Future of<br>Fuel Management.</h2>
+                <p>Start your 14-day premium trial today. No credit card required. Track every drop, save every cent.</p>
             </div>
 
-            <form action="{{ url_for('register') }}" method="POST" class="auth-form" id="registerForm" novalidate>
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" id="name" name="name" placeholder="John Doe" required autocomplete="name">
-                    </div>
+            <div class="auth-trust-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Enterprise-grade security 🔒</span>
+            </div>
+        </div>
+
+        <!-- Auth Section -->
+        <div class="auth-section">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Get Started</h1>
+                    <p>Create your account in less than a minute</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="john@example.com" required autocomplete="email">
+                <form action="/register" method="POST" id="authForm" novalidate>
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" class="input-field" placeholder="John Doe" required autocomplete="name">
+                        <label for="name" class="field-label">Full Name</label>
                     </div>
-                    <span class="error-message" id="emailError">Please enter a valid email address.</span>
-                </div>
 
-                <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <label for="password" style="margin-bottom: 0;">Password</label>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" class="input-field" placeholder="john@example.com" required autocomplete="email">
+                        <label for="email" class="field-label">Email Address</label>
                     </div>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
-                        <button type="button" class="toggle-password" id="togglePassword" title="Show/Hide Password">
+
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
+                        <label for="password" class="field-label">Password</label>
+                        <button type="button" class="password-toggle" id="togglePassword">
                             <i class="fa-solid fa-eye" id="eyeIcon"></i>
                         </button>
+                        
+                        <!-- Strength Meter -->
+                        <div class="strength-meter" id="strengthMeter">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <p class="strength-text" id="strengthText"></p>
                     </div>
-                    <span class="error-message" id="passwordError">Password is required.</span>
+
+                    <div class="form-group">
+                        <input type="password" id="confirm_password" name="confirm_password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
+                        <label for="confirm_password" class="field-label">Confirm Password</label>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                    </div>
+
+                    <button type="submit" class="btn-premium" id="submitBtn">
+                        <span class="btn-text">Create Account</span>
+                        <i class="fa-solid fa-user-plus"></i>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
                 </div>
-                
-
-                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
-                    <span>Register Now &rarr;</span>
-                    <div class="spinner"></div>
-                </button>
-            </form>
-
-            <div class="auth-footer">
-                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('registerForm');
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const passInput = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    
-    const emailError = document.getElementById('emailError');
-    const passError = document.getElementById('passwordError');
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="toast {{ category }} show">
+            {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
+            {% elif category == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
+            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
 
-    const toggleBtn = document.getElementById('togglePassword');
-    const eyeIcon = document.getElementById('eyeIcon');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('authForm');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            const submitBtn = document.getElementById('submitBtn');
+            const toggleBtn = document.getElementById('togglePassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const strengthMeter = document.getElementById('strengthMeter');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            const toasts = document.querySelectorAll('.toast');
 
-    // Password Toggle
-    toggleBtn.addEventListener('click', () => {
-        const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passInput.setAttribute('type', type);
-        eyeIcon.classList.toggle('fa-eye');
-        eyeIcon.classList.toggle('fa-eye-slash');
-    });
+            // Hide toasts
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, 4000);
+            });
 
-    // Real-time Validation Function
-    const validateForm = () => {
-        let isValid = true;
-        const nameVal = nameInput.value.trim();
-        const emailVal = emailInput.value.trim();
-        const passVal = passInput.value.trim();
+            // Password Toggle
+            toggleBtn.addEventListener('click', () => {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                eyeIcon.classList.toggle('fa-eye');
+                eyeIcon.classList.toggle('fa-eye-slash');
+            });
 
-        if (emailVal.length > 0 && !emailVal.includes('@')) {
-            emailInput.classList.add('error');
-            emailError.classList.add('active');
-            isValid = false;
-        } else {
-            emailInput.classList.remove('error');
-            emailError.classList.remove('active');
-        }
+            // Password Strength Logic
+            password.addEventListener('input', () => {
+                const val = password.value;
+                if (!val) {
+                    strengthMeter.style.display = 'none';
+                    strengthText.style.display = 'none';
+                    return;
+                }
 
-        // Disable button if strictly empty
-        submitBtn.disabled = (nameVal === '' || emailVal === '' || passVal === '');
+                strengthMeter.style.display = 'block';
+                strengthText.style.display = 'block';
 
-        return isValid && nameVal !== '' && emailVal !== '' && passVal !== '';
-    };
+                let strength = 0;
+                if (val.length >= 8) strength++;
+                if (/[A-Z]/.test(val)) strength++;
+                if (/[0-9]/.test(val)) strength++;
+                if (/[^A-Za-z0-9]/.test(val)) strength++;
 
-    nameInput.addEventListener('input', validateForm);
-    emailInput.addEventListener('input', validateForm);
-    passInput.addEventListener('input', validateForm);
+                let color = '#ef4444';
+                let text = 'Weak';
+                let width = '25%';
 
-    // Initial check (in case browser auto-fills)
-    validateForm();
+                if (strength === 2) { color = '#f59e0b'; text = 'Fair'; width = '50%'; }
+                else if (strength === 3) { color = '#3b82f6'; text = 'Good'; width = '75%'; }
+                else if (strength === 4) { color = '#10b981'; text = 'Excellent'; width = '100%'; }
 
-    form.addEventListener('submit', (e) => {
-        if (!validateForm()) {
-            e.preventDefault();
-            return;
-        }
+                strengthBar.style.width = width;
+                strengthBar.style.backgroundColor = color;
+                strengthText.innerText = `Strength: ${text}`;
+                strengthText.style.color = color;
+            });
 
-        // Add loading state
-        submitBtn.classList.add('loading');
-        
-        // Artificial delay for premium UX
-        e.preventDefault();
-        setTimeout(() => {
-            form.submit();
-        }, 600);
-    });
-});
-</script>
-{% endblock %}
+            // Form Submit & Inline Validation
+            form.addEventListener('submit', (e) => {
+                if (password.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    showToast('Passwords do not match!', 'error');
+                    confirmPassword.style.borderColor = '#ef4444';
+                    return;
+                }
+
+                const btnText = submitBtn.querySelector('.btn-text');
+                const btnIcon = submitBtn.querySelector('i');
+                const spinner = submitBtn.querySelector('.spinner');
+
+                btnText.style.display = 'none';
+                btnIcon.style.display = 'none';
+                spinner.style.display = 'block';
+                submitBtn.disabled = true;
+            });
+
+            function showToast(message, category) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${category} show`;
+                toast.innerHTML = `
+                    <i class="fa-solid ${category === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'}"></i>
+                    <span>${message}</span>
+                `;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -35,7 +35,7 @@
                 <div class="form-group">
                     <label>Fuel Type</label>
                     {% set vehicles_submit_url = url_for('vehicles') %}
-                    <select name="fuelType" onchange="document.getElementById('vehicleAction').value='refresh'; this.form.submit();">
+                    <select name="fuel_type" onchange="document.getElementById('vehicleAction').value='refresh'; this.form.submit();">
                         <option value="Petrol" {% if selected_fuel=='Petrol' %}selected{% endif %}>Petrol</option>
                         <option value="Diesel" {% if selected_fuel=='Diesel' %}selected{% endif %}>Diesel</option>
                         <option value="CNG" {% if selected_fuel=='CNG' %}selected{% endif %}>CNG</option>
@@ -57,8 +57,8 @@
                         {% elif selected_fuel == 'CNG' %}Tank Capacity (kg)
                         {% else %}Tank Size (L){% endif %}
                     </label>
-                    <input type="number" step="1" name="tankSize"
-                        value="{{ request.form.get('tankSize', '45' if selected_fuel in ['Petrol', 'Diesel'] else '') }}">
+                    <input type="number" step="1" name="tank_size"
+                        value="{{ request.form.get('tank_size', '45' if selected_fuel in ['Petrol', 'Diesel'] else '') }}">
                 </div>
                 <div class="form-group">
                     <label>Year (Optional)</label>
@@ -80,21 +80,21 @@
             <div class="vc-header">
                 <div class="vc-icon">
                     <i
-                        class="fa-solid {% if (v.vehicleType or v.type) == 'bike' %}fa-motorcycle{% elif (v.vehicleType or v.type) == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
+                        class="fa-solid {% if v.vehicle_type == 'bike' %}fa-motorcycle{% elif v.vehicle_type == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
                 </div>
                 <div>
-                    <div class="vc-name">{{ v.name }}</div>
-                    <div class="vc-type">{{ v.vehicleType|default(v.type)|default('Car')|capitalize }}</div>
+                    <div class="vc-name">{{ v.vehicle_name }}</div>
+                    <div class="vc-type">{{ v.vehicle_type|default('Car')|capitalize }}</div>
                 </div>
             </div>
             <div class="vc-details">
-                <span class="vc-tag">⛽ {{ v.mileage }} {% if v.fuelType == 'EV' %}km/kWh{% elif v.fuelType == 'CNG'
+                <span class="vc-tag">⛽ {{ v.mileage }} {% if v.fuel_type == 'EV' %}km/kWh{% elif v.fuel_type == 'CNG'
                     %}km/kg{% else %}km/L{% endif %}</span>
-                <span class="vc-tag">🛢️ {{ v.fuelType }}</span>
-                {% if v.fuelType == 'EV' and v.get('batteryRange', 0) > 0 %}
-                <span class="vc-tag">📦 {{ v.batteryRange|round|int }} kWh</span>
-                {% elif v.get('tankSize', 0) > 0 %}
-                <span class="vc-tag">📦 {{ v.tankSize|round|int }} {% if v.fuelType == 'CNG' %}kg{% else %}L{% endif
+                <span class="vc-tag">🛢️ {{ v.fuel_type }}</span>
+                {% if v.fuel_type == 'EV' and v.get('battery_range', 0) > 0 %}
+                <span class="vc-tag">📦 {{ v.battery_range|round|int }} kWh</span>
+                {% elif v.get('tank_size', 0) > 0 %}
+                <span class="vc-tag">📦 {{ v.tank_size|round|int }} {% if v.fuel_type == 'CNG' %}kg{% else %}L{% endif
                     %}</span>
                 {% endif %}
                 {% if v.year %}
@@ -103,7 +103,7 @@
             </div>
             <div class="vc-actions">
                 <form method="POST" action="{{ url_for('vehicles') }}"
-                    onsubmit="return confirm('Are you sure you want to delete {{ v.name }}?');" style="flex:1;">
+                    onsubmit="return confirm('Are you sure you want to delete {{ v.vehicle_name }}?');" style="flex:1;">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="vehicle_id" value="{{ v.id }}">
                     <button type="submit" class="vc-delete" style="width: 100%; border-radius: 6px;"><i

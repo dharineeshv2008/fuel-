@@ -13,7 +13,7 @@
     {% endif %}
     {% set fuel_type = 'Petrol' %}
     {% if selected_v %}
-        {% set fuel_type = selected_v.get('fuelType', 'Petrol') %}
+        {% set fuel_type = selected_v.get('fuel_type', 'Petrol') %}
     {% endif %}
 
     <div class="page-header">
@@ -37,8 +37,8 @@
                     <select name="vehicle_id" onchange="document.getElementById('calcAction').value='refresh'; this.form.submit();">
                         <option value="">— Select a Vehicle —</option>
                         {% for v in vehicles %}
-                        <option value="{{ v.id }}" {% if form_v_id == v.id %}selected{% endif %}>{{ v.name }}
-                            ({{ v.mileage }} {% if v.get('fuelType', 'Petrol') == 'EV' %}km/kWh{% elif v.get('fuelType') == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
+                        <option value="{{ v.id }}" {% if form_v_id == v.id %}selected{% endif %}>{{ v.vehicle_name }}
+                            ({{ v.mileage }} {% if v.get('fuel_type', 'Petrol') == 'EV' %}km/kWh{% elif v.get('fuel_type') == 'CNG' %}km/kg{% else %}km/L{% endif %})</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -205,9 +205,12 @@
                     <input type="hidden" name="distance_val" value="{{ result.distance }}">
                     <input type="hidden" name="fuel_needed_val" value="{{ result.fuel_needed }}">
                     <input type="hidden" name="total_cost_val" value="{{ result.total_cost }}">
+                    <input type="hidden" name="price_val" value="{{ result.fuel_price }}">
+                    <input type="hidden" name="vehicle_id_val" value="{{ form.get('vehicle_id', '') }}">
+                    <input type="hidden" name="passengers_val" value="{{ form.get('passengers', '1') }}">
                     <input type="hidden" name="trip_type_val"
                         value="{{ 'Round Trip' if form.get('trip_type') == 'round-trip' else 'One Way' }}">
-                    <input type="hidden" name="unit_val" value="{% if selected_v %}{% if selected_v.get('fuelType', 'Petrol') == 'EV' %}kWh{% elif selected_v.get('fuelType') == 'CNG' %}kg{% else %}L{% endif %}{% else %}L{% endif %}">
+                    <input type="hidden" name="unit_val" value="{% if selected_v %}{% if selected_v.get('fuel_type', 'Petrol') == 'EV' %}kWh{% elif selected_v.get('fuel_type') == 'CNG' %}kg{% else %}L{% endif %}{% else %}L{% endif %}">
                     <button type="submit" class="btn btn-outline" style="width:100%;"><i
                             class="fa-solid fa-floppy-disk"></i> Save to History</button>
                 </form>

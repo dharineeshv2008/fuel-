@@ -34,7 +34,7 @@
                     <select name="vehicle">
                         <option value="">— Optional —</option>
                         {% for v in vehicles %}
-                        <option value="{{ v.id }}">{{ v.name }}</option>
+                        <option value="{{ v.id }}">{{ v.vehicle_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -60,8 +60,8 @@
                         <span class="he-title">{{ l.litres|round(1) }} L @ {{ format_currency(l.price) }}/L</span>
                         <span class="he-detail">
                             {{ l.date }}
-                            {% if l.vehicleId in vmap %}
-                            · {{ vmap[l.vehicleId] }}
+                            {% if l.vehicle_id in vmap %}
+                            · {{ vmap[l.vehicle_id] }}
                             {% endif %}
                             {% if l.notes %}
                             · {{ l.notes }}
@@ -93,18 +93,23 @@
         <div class="card slide-up delay-2">
             <h3><i class="fa-solid fa-calculator"></i> Saved Calculations</h3>
             <div class="history-list">
-                {% if calcs %}
-                {% for c in calcs %}
+                {% if trips %}
+                {% for c in trips %}
                 <div class="history-entry">
                     <div class="he-info">
-                        <span class="he-title">{{ c.distance|round|int }} km · {{ c.fuel_needed|round(1) }} {{ c.unit|default('L') }}</span>
-                        <span class="he-detail">{{ c.date }} · {{ c.trip_type|capitalize }}</span>
+                        <span class="he-title">{{ c.distance|round|int }} km</span>
+                        <span class="he-detail">
+                            {{ c.created_at.split('T')[0] }} · {{ c.trip_type|capitalize }}
+                            {% if c.vehicle_id in vmap %}
+                            · {{ vmap[c.vehicle_id] }}
+                            {% endif %}
+                        </span>
                     </div>
                     <span class="he-amount">{{ format_currency(c.total_cost) }}</span>
                     <div class="he-actions">
                         <form method="POST" action="{{ url_for('history') }}" style="margin:0;">
-                            <input type="hidden" name="action" value="delete_calc">
-                            <input type="hidden" name="calc_id" value="{{ c.id }}">
+                            <input type="hidden" name="action" value="delete_trip">
+                            <input type="hidden" name="trip_id" value="{{ c.id }}">
                             <button type="submit"
                                 style="background:none; border:none; color:var(--text-muted); padding:4px; font-size:0.9rem; cursor:pointer;"
                                 onclick="return confirm('Delete this calculation?');"><i
