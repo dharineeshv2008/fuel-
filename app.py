@@ -15,8 +15,27 @@ from utils import (
     safe_float
 )
 
-app = Flask(__name__)
+# Resolve absolute paths for Vercel serverless compatibility
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static")
+)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-fuelwise-super-secret-key")
+
+
+# --- ERROR HANDLERS (production robustness) ---
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("login.html"), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return "Internal Server Error", 500
 
 # --- MIDDLEWARE & GLOBALS ---
 
