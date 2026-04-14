@@ -1,22 +1,36 @@
 import random
 import os
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-from supabase import create_client, Client
 from datetime import datetime
 
 # Load environment variables
 load_dotenv()
 
-# --- TASK 1: SUPABASE CLIENT SETUP & DEBUG ---
-url: str = os.environ.get("SUPABASE_URL", "")
-key: str = os.environ.get("SUPABASE_KEY", "")
+# --- SUPABASE CLIENT SETUP ---
+# Lazy initialization to prevent crash-on-import in Vercel serverless
+_supabase_client = None
 
-print(f"DEBUG: SUPABASE_URL: {url[:15]}...") # Masked for security
-if not url or not key:
-    print("CRITICAL ERROR: SUPABASE_URL or SUPABASE_KEY missing from environment!")
+def _get_supabase():
+    """Lazy-load the Supabase client. This prevents import-time crashes
+    on Vercel if env vars are missing or the SDK has transient issues."""
+    global _supabase_client
+    if _supabase_client is None:
+        from supabase import create_client
+        url = os.environ.get("SUPABASE_URL", "")
+        key = os.environ.get("SUPABASE_KEY", "")
+        if not url or not key:
+            raise RuntimeError("SUPABASE_URL or SUPABASE_KEY missing from environment!")
+        _supabase_client = create_client(url, key)
+    return _supabase_client
 
-supabase: Client = create_client(url, key)
+# Property-like accessor for backward compatibility
+class _SupabaseProxy:
+    """Proxy object so existing code like `supabase.auth.sign_in(...)` keeps working."""
+    def __getattr__(self, name):
+        return getattr(_get_supabase(), name)
+
+supabase = _SupabaseProxy()
 
 # --- UTILITIES ---
 
@@ -29,11 +43,12 @@ def safe_float(value, default=0.0):
         return default
 
 def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    """Hash password using Werkzeug (pure Python, no C extensions needed)."""
+    return generate_password_hash(password)
 
 def check_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    """Verify password against hash."""
+    return check_password_hash(hashed, password)
 
 # --- CORE CALCULATIONS ---
 
@@ -106,50 +121,47 @@ def format_currency(amount, symbol):
 # --- DATABASE HELPERS ---
 
 def db_insert_user(user_id, name, email, password):
-    """Insert user into public table with explicit print logs."""
+    """Insert user into public table."""
     try:
-        print(f"DEBUG: Attempting to insert profile for user_id: {user_id}")
-        # Task 2: Use explicit .insert() as requested
-        res = supabase.table("users").insert({
+        res = _get_supabase().table("users").insert({
             "id": user_id,
             "name": name,
             "email": email,
             "password": hash_password(password)
         }).execute()
-        print(f"DEBUG: Supabase Profile Insert Response: {res}")
         return res
     except Exception as e:
         print(f"CRITICAL: Failed to insert profile for user {email}: {str(e)}")
         raise e
 
 def db_get_vehicles(user_id):
-    return supabase.table("vehicles").select("*").eq("user_id", user_id).execute()
+    return _get_supabase().table("vehicles").select("*").eq("user_id", user_id).execute()
 
 def db_insert_vehicle(user_id, data):
     data["user_id"] = user_id
-    return supabase.table("vehicles").insert(data).execute()
+    return _get_supabase().table("vehicles").insert(data).execute()
 
 def db_delete_vehicle(user_id, vehicle_id):
-    return supabase.table("vehicles").delete().eq("user_id", user_id).eq("id", vehicle_id).execute()
+    return _get_supabase().table("vehicles").delete().eq("user_id", user_id).eq("id", vehicle_id).execute()
 
 def db_get_trips(user_id):
-    return supabase.table("trips").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
+    return _get_supabase().table("trips").select("*").eq("user_id", user_id).order("created_at", desc=True).execute()
 
 def db_insert_trip(user_id, data):
     data["user_id"] = user_id
-    return supabase.table("trips").insert(data).execute()
+    return _get_supabase().table("trips").insert(data).execute()
 
 def db_delete_trip(user_id, trip_id):
-    return supabase.table("trips").delete().eq("user_id", user_id).eq("id", trip_id).execute()
+    return _get_supabase().table("trips").delete().eq("user_id", user_id).eq("id", trip_id).execute()
 
 def db_get_fuel_logs(user_id):
-    return supabase.table("fuel_logs").select("*").eq("user_id", user_id).order("date", desc=True).execute()
+    return _get_supabase().table("fuel_logs").select("*").eq("user_id", user_id).order("date", desc=True).execute()
 
 def db_insert_fuel_log(user_id, data):
     data["user_id"] = user_id
     if "total_cost" not in data and "litres" in data and "price" in data:
         data["total_cost"] = float(data["litres"]) * float(data["price"])
-    return supabase.table("fuel_logs").insert(data).execute()
+    return _get_supabase().table("fuel_logs").insert(data).execute()
 
 def db_delete_fuel_log(user_id, log_id):
-    return supabase.table("fuel_logs").delete().eq("user_id", user_id).eq("id", log_id).execute()
+    return _get_supabase().table("fuel_logs").delete().eq("user_id", user_id).eq("id", log_id).execute()
