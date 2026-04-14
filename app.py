@@ -35,6 +35,14 @@ def not_found(e):
 
 @app.errorhandler(500)
 def internal_error(e):
+    error_msg = str(e)
+    if "SUPABASE_URL" in error_msg or "SUPABASE_KEY" in error_msg:
+        return (
+            "<h1>⚠️ Server Configuration Error</h1>"
+            "<p>Supabase environment variables are not set.</p>"
+            "<p>Add <code>SUPABASE_URL</code>, <code>SUPABASE_KEY</code>, and "
+            "<code>FLASK_SECRET_KEY</code> in Vercel → Project Settings → Environment Variables.</p>"
+        ), 500
     return "Internal Server Error", 500
 
 # --- MIDDLEWARE & GLOBALS ---

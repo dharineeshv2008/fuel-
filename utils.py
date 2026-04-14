@@ -4,8 +4,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from datetime import datetime
 
-# Load environment variables
+# Load environment variables (.env for local dev, Vercel injects them in production)
 load_dotenv()
+
+# --- DEBUG: Log env var status (visible in Vercel Function Logs) ---
+_supa_url = os.environ.get("SUPABASE_URL", "")
+_supa_key = os.environ.get("SUPABASE_KEY", "")
+print(f"[FuelWise] SUPABASE_URL: {'SET (' + _supa_url[:25] + '...)' if _supa_url else 'MISSING'}")
+print(f"[FuelWise] SUPABASE_KEY: {'SET' if _supa_key else 'MISSING'}")
+print(f"[FuelWise] FLASK_SECRET_KEY: {'SET' if os.environ.get('FLASK_SECRET_KEY') else 'MISSING (using default)'}")
 
 # --- SUPABASE CLIENT SETUP ---
 # Lazy initialization to prevent crash-on-import in Vercel serverless
@@ -20,7 +27,10 @@ def _get_supabase():
         url = os.environ.get("SUPABASE_URL", "")
         key = os.environ.get("SUPABASE_KEY", "")
         if not url or not key:
-            raise RuntimeError("SUPABASE_URL or SUPABASE_KEY missing from environment!")
+            raise RuntimeError(
+                "SUPABASE_URL or SUPABASE_KEY missing from environment! "
+                "Add them in Vercel Dashboard → Project → Settings → Environment Variables."
+            )
         _supabase_client = create_client(url, key)
     return _supabase_client
 
