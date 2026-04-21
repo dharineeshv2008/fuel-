@@ -1,0 +1,129 @@
+{# ═══════════════════════════════════════════════════════════
+   FuelWise UI Components (Stitch MCP Aligned)
+   ═══════════════════════════════════════════════════════════ #}
+
+{% macro InputField(name, label, type='text', value='', placeholder=' ', step='', required=false, helper='', disabled=false) %}
+<div class="fw-input-group group">
+    <label for="id_{{ name }}" class="fw-label">
+        {{ label }}
+    </label>
+    <input type="{{ type }}" name="{{ name }}" id="id_{{ name }}"
+           class="fw-input"
+           placeholder="{{ placeholder }}" value="{{ value }}" 
+           {% if step %}step="{{ step }}"{% endif %} 
+           {% if required %}required{% endif %}
+           {% if disabled %}disabled{% endif %}>
+    {% if helper %}
+    <p class="mt-1.5 px-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
+        <i class="fa-solid fa-circle-info scale-90"></i> {{ helper }}
+    </p>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro SelectField(name, label, options, selected='', onchange='', required=false) %}
+<div class="fw-input-group fw-select-custom" id="container_{{ name }}">
+    <label class="fw-label">
+        {{ label }}
+    </label>
+    
+    {# Hidden native select for form data #}
+    <select name="{{ name }}" id="id_{{ name }}" class="hidden" 
+            {% if onchange %}onchange="{{ onchange }}"{% endif %}
+            {% if required %}required{% endif %}>
+        {% for val, text in options %}
+        <option value="{{ val }}" {% if selected|string == val|string %}selected{% endif %}>{{ text }}</option>
+        {% endfor %}
+    </select>
+
+    {# Custom UI Trigger #}
+    <div class="fw-select-trigger" onclick="toggleDropdown('{{ name }}')">
+        <span id="label_{{ name }}" class="truncate pr-8">
+            {% set initial_text = 'Select an option' %}
+            {% for val, text in options %}
+                {% if selected|string == val|string %}{% set initial_text = text %}{% endif %}
+            {% endfor %}
+            {{ initial_text }}
+        </span>
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 dark:text-gray-500">
+            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-300" id="icon_{{ name }}"></i>
+        </div>
+    </div>
+
+    {# Custom UI Menu #}
+    <div class="fw-dropdown-menu" id="menu_{{ name }}">
+        {% for val, text in options %}
+        <div class="fw-dropdown-item {% if selected|string == val|string %}selected{% endif %}" 
+             onclick="selectOption('{{ name }}', '{{ val }}', '{{ text | replace("'", "\\'") }}')">
+             {{ text }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        if (typeof toggleDropdown === 'undefined') {
+            window.toggleDropdown = function(name) {
+                const container = document.getElementById('container_' + name);
+                const icon = document.getElementById('icon_' + name);
+                const isOpen = container.classList.contains('open');
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.fw-select-custom').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.fa-chevron-down').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                if (!isOpen) {
+                    container.classList.add('open');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            };
+
+            window.selectOption = function(name, val, text) {
+                const select = document.getElementById('id_' + name);
+                const label = document.getElementById('label_' + name);
+                const container = document.getElementById('container_' + name);
+                const icon = document.getElementById('icon_' + name);
+
+                select.value = val;
+                label.innerText = text;
+                container.classList.remove('open');
+                icon.style.transform = 'rotate(0deg)';
+
+                // Update visual selection in menu
+                container.querySelectorAll('.fw-dropdown-item').forEach(item => {
+                    item.classList.toggle('selected', item.innerText === text);
+                });
+
+                // Trigger change event for any listeners (like the mileage populator)
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            };
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.fw-select-custom')) {
+                    document.querySelectorAll('.fw-select-custom').forEach(el => el.classList.remove('open'));
+                    document.querySelectorAll('.fa-chevron-down').forEach(i => i.style.transform = 'rotate(0deg)');
+                }
+            });
+        }
+    </script>
+</div>
+{% endmacro %}
+
+{% macro GradientButton(text, icon='', type='submit', class='', onclick='', disabled=false) %}
+<button type="{{ type }}" 
+        class="inline-flex items-center justify-center gap-2.5 h-12 px-6 font-bold text-white bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-60 disabled:pointer-events-none {{ class }}" 
+        {% if onclick %}onclick="{{ onclick }}"{% endif %}
+        {% if disabled %}disabled{% endif %}>
+    {% if icon %}<i class="fa-solid {{ icon }} transition-transform group-hover:scale-110"></i>{% endif %}
+    <span>{{ text }}</span>
+</button>
+{% endmacro %}
+
+{% macro OutlineButton(text, icon='', type='button', class='', onclick='') %}
+<button type="{{ type }}" 
+        class="inline-flex items-center justify-center gap-2.5 h-12 px-6 font-bold text-gray-700 dark:text-white bg-white/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 transition-all active:scale-[0.98] {{ class }}" 
+        {% if onclick %}onclick="{{ onclick }}"{% endif %}>
+    {% if icon %}<i class="fa-solid {{ icon }}"></i>{% endif %}
+    <span>{{ text }}</span>
+</button>
+{% endmacro %}

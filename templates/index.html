@@ -1,78 +1,137 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="page active" id="page-dashboard">
-    <div class="page-header">
-        <h1>Dashboard</h1>
-        <p class="page-subtitle">Welcome back! Here's your fuel overview.</p>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon blue"><i class="fa-solid fa-wallet"></i></div>
-            <div class="stat-info">
-                <span class="stat-value" id="statTotalSpent">{{ format_currency(total_spent) }}</span>
-                <span class="stat-label">Total Spent</span>
-            </div>
+<div class="animate-fade-up max-w-6xl mx-auto" id="page-dashboard">
+    <div class="flex flex-col md:flex-row justify-between items-start mb-10 gap-4 px-2">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white">SaaS Command Center</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 font-medium">Welcome back, {{ user.name.split(' ')[0] if user else 'Commander' }}! Here is your fleet intelligence.</p>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><i class="fa-solid fa-route"></i></div>
-            <div class="stat-info">
-                <span class="stat-value" id="statTotalDistance">{{ total_distance|round|int }} km</span>
-                <span class="stat-label">Calc Distance</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon orange"><i class="fa-solid fa-gas-pump"></i></div>
-            <div class="stat-info">
-                <span class="stat-value" id="statTotalFuel">{{ total_fuel|round(1) }} L</span>
-                <span class="stat-label">Total Fuel Add</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon purple"><i class="fa-solid fa-car-side"></i></div>
-            <div class="stat-info">
-                <span class="stat-value" id="statVehicleCount">{{ vehicle_count }}</span>
-                <span class="stat-label">Vehicles</span>
-            </div>
+        <div class="px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-bold uppercase tracking-widest">
+            Smart Fuel. Smarter Savings.
         </div>
     </div>
 
-    <div class="dashboard-bottom-row">
-        <!-- Recent Activity -->
-        <div class="card slide-up delay-1">
-            <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
-            <div class="activity-list" id="recentActivity">
-                {% if recent_activity %}
-                {% for item in recent_activity %}
-                <div class="history-entry">
-                    <div class="he-info">
-                        <span class="he-title"><i class="fa-solid {{ item.icon }}"
-                                style="margin-right:6px;color:var(--accent-primary)"></i>{{ item.text }}</span>
-                        <span class="he-detail">{{ item.date }}</span>
-                    </div>
-                    <span class="he-amount">{{ item.amount }}</span>
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10 px-2">
+        <div class="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl shadow-inner group-hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-wallet"></i>
                 </div>
-                {% endfor %}
+                <div>
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Spent</span>
+                    <span class="block text-2xl font-black text-gray-900 dark:text-white">{{ format_currency(total_spent) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-success/5 hover:border-success/30 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-success/10 flex items-center justify-center text-success text-xl shadow-inner group-hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Total Distance</span>
+                    <span class="block text-2xl font-black text-gray-900 dark:text-white">{{ total_distance|round|int }}<span class="text-xs font-bold text-gray-400 ml-1">KM</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-warning/5 hover:border-warning/30 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center text-warning text-xl shadow-inner group-hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-gas-pump"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Fuel Processed</span>
+                    <span class="block text-2xl font-black text-gray-900 dark:text-white">{{ total_fuel|round(1) }}<span class="text-xs font-bold text-gray-400 ml-1">L</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="group bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-secondary/5 hover:border-secondary/30 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary text-xl shadow-inner group-hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Managed Fleet</span>
+                    <span class="block text-2xl font-black text-gray-900 dark:text-white">{{ vehicle_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 px-2 lg:items-start">
+        <!-- Recent Activity Stream -->
+        <div class="lg:col-span-7 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                <h3 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Activity Stream</h3>
+            </div>
+            
+            <div class="space-y-4">
+                {% if recent_activity %}
+                    {% for item in recent_activity %}
+                    <div class="group flex items-center gap-5 p-4 rounded-2xl bg-gray-50/50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5 hover:bg-white dark:hover:bg-white/[0.05] hover:shadow-sm transition-all animate-fade-up" style="animation-delay: {{ loop.index * 0.1 }}s">
+                        <div class="w-11 h-11 rounded-xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:text-primary transition-colors">
+                            <i class="fa-solid {{ item.icon }}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="block text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">{{ item.text }}</span>
+                            <span class="block text-[11px] font-medium text-gray-500 dark:text-gray-400">{{ item.date }}</span>
+                        </div>
+                        {% if item.amount %}
+                        <div class="text-right">
+                            <span class="text-sm font-black text-primary">{{ item.amount }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 {% else %}
-                <p class="empty-state">No fuel logs yet. Start by calculating your trip cost!</p>
+                    <div class="py-12 text-center group">
+                        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-6 transition-transform group-hover:scale-110">
+                            <i class="fa-solid fa-satellite-dish text-3xl text-gray-300 dark:text-gray-600"></i>
+                        </div>
+                        <h4 class="text-lg font-bold text-gray-400 mb-2">Awaiting Telemetry Sync</h4>
+                        <p class="text-sm text-gray-500 font-medium max-w-[200px] mx-auto">Compute your first log to start the activity stream.</p>
+                    </div>
                 {% endif %}
             </div>
         </div>
 
-        <div class="dashboard-sidebar-column">
-            <!-- Monthly Insight -->
-            <div class="card slide-up delay-2"
-                style="background: var(--accent-primary-light); border-color: var(--accent-primary); color: var(--accent-primary);">
-                <h3><i class="fa-solid fa-chart-line"></i> Monthly Insight</h3>
-                <p style="font-weight: 600; font-size: 1rem;">{{ insight }}</p>
+        <!-- Sidebar Widgets -->
+        <div class="lg:col-span-5 space-y-8">
+            <!-- Strategic Insight -->
+            <div class="relative overflow-hidden bg-gradient-to-br from-primary to-secondary p-8 rounded-[2.5rem] shadow-xl shadow-primary/20 group">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+                <div class="relative z-10">
+                    <h3 class="text-white/80 text-[10px] font-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> Strategic Insight
+                    </h3>
+                    <p class="text-2xl font-black text-white leading-tight mb-8">{{ insight }}</p>
+                    <a href="{{ url_for('history') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg">
+                        <i class="fa-solid fa-layer-group"></i> Master Report
+                    </a>
+                </div>
             </div>
 
-            <!-- Tip -->
-            <div class="card tip-card slide-up delay-3">
-                <h4><i class="fa-regular fa-lightbulb"></i> Fuel Saving Tip</h4>
-                <p class="tip-text" id="fuelTip" style="margin-top:12px;">{{ tip }}</p>
+            <!-- Pro Tip -->
+            <div class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-1.5 h-6 bg-secondary rounded-full"></div>
+                    <h4 class="text-xs font-black uppercase tracking-widest text-secondary">Operational Protocol</h4>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{{ tip }}</p>
+                <div class="mt-8 pt-8 border-t border-gray-100 dark:border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa-solid fa-lightbulb text-xs"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Optimizing Performance</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

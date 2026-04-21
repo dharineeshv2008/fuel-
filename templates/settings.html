@@ -1,97 +1,153 @@
 {% extends "base.html" %}
+{% from 'components.html' import InputField, SelectField, GradientButton, OutlineButton %}
 
 {% block content %}
-<div class="page active" id="page-settings">
-    <div class="page-header">
-        <h1>Settings</h1>
-        <p class="page-subtitle">Customize your FuelWise experience.</p>
+<div class="animate-fade-up max-w-6xl mx-auto" id="page-settings">
+    <div class="flex flex-col md:flex-row justify-between items-start mb-8 gap-4 px-2">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">Configuration</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your account protocols and system preferences.</p>
+        </div>
+        <div class="px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-bold uppercase tracking-widest">
+            System Settings
+        </div>
     </div>
 
-    <div class="settings-grid">
-        <!-- Display & Preferences -->
-        <div class="card slide-up">
-            <h3><i class="fa-solid fa-palette"></i> Display & Preferences</h3>
-            <form method="POST" action="{{ url_for('settings') }}">
-                <input type="hidden" name="action" value="save">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 px-2">
+        <!-- Sidebar Navigation -->
+        <div class="lg:col-span-3 space-y-3">
+            <a href="#identity" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-primary text-white font-semibold transition-all shadow-lg shadow-primary/25 group">
+                <i class="fa-solid fa-id-badge transition-transform group-hover:scale-110"></i>
+                <span>Identity</span>
+            </a>
+            <a href="#localization" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl hover:bg-white/50 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 font-medium transition-all group">
+                <i class="fa-solid fa-earth-americas transition-transform group-hover:scale-110"></i>
+                <span>Localization</span>
+            </a>
+            <a href="#security" class="flex items-center gap-3 px-5 py-3.5 rounded-2xl hover:bg-white/50 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400 font-medium transition-all group">
+                <i class="fa-solid fa-shield-halved transition-transform group-hover:scale-110"></i>
+                <span>Security</span>
+            </a>
 
-                <div class="setting-item">
-                    <div>
-                        <strong>Theme Preference</strong>
-                        <div class="helper">Choose light or dark mode</div>
-                    </div>
-                    <select name="theme">
-                        <option value="light" {% if theme=='light' %}selected{% endif %}>Light Mode</option>
-                        <option value="dark" {% if theme=='dark' %}selected{% endif %}>Dark Mode</option>
-                    </select>
-                </div>
-
-                <div class="setting-item">
-                    <div>
-                        <strong>Currency Symbol</strong>
-                        <div class="helper">Symbol used across the app</div>
-                    </div>
-                    <select name="currency">
-                        <option value="₹" {% if currency=='₹' %}selected{% endif %}>₹ (INR)</option>
-                        <option value="$" {% if currency=='$' %}selected{% endif %}>$ (USD/CAD/AUD)</option>
-                        <option value="€" {% if currency=='€' %}selected{% endif %}>€ (EUR)</option>
-                        <option value="£" {% if currency=='£' %}selected{% endif %}>£ (GBP)</option>
-                        <option value="¥" {% if currency=='¥' %}selected{% endif %}>¥ (JPY/CNY)</option>
-                    </select>
-                </div>
-
-                <div class="setting-item">
-                    <div>
-                        <strong>Default Fuel Price</strong>
-                        <div class="helper">Auto-fill price in calculators</div>
-                    </div>
-                    <input type="number" step="0.01" name="default_price" style="width:100px;"
-                        value="{{ session.get('default_price', '') }}">
-                </div>
-
-                <div class="setting-item">
-                    <div>
-                        <strong>Distance / Volume Unit</strong>
-                        <div class="helper">App metric primarily uses km/L</div>
-                    </div>
-                    <select name="unit">
-                        <option value="km" {% if session.get('unit')=='km' %}selected{% endif %}>Metric (km, Litres)
-                        </option>
-                        <option value="mi" {% if session.get('unit')=='mi' %}selected{% endif %}>Imperial (mi, Gal)
-                        </option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-full" style="margin-top: 24px;"><i
-                        class="fa-solid fa-floppy-disk"></i> Save Settings</button>
-            </form>
+            <div class="mt-8 p-6 rounded-2xl bg-red-500/5 border border-red-500/10 active:scale-[0.98] transition-all group cursor-pointer">
+                <h4 class="text-red-500 text-sm font-bold flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">Terminate account protocols and wipe all telemetry.</p>
+                <button class="w-full py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all">
+                    Initiate Purge
+                </button>
+            </div>
         </div>
 
-        <!-- Data Management -->
-        <div class="card slide-up delay-1">
-            <h3><i class="fa-solid fa-database"></i> Session Data Management</h3>
-
-            <div class="setting-item">
-                <div>
-                    <strong>Data Storage</strong>
-                    <div class="helper">Data is stored in your secure session cookie.</div>
-                    <div class="helper" style="color:var(--accent-red); margin-top:4px;">Warning: Closing browser
-                        removes this session data.</div>
+        <!-- Main Content -->
+        <div class="lg:col-span-9 space-y-8 pb-12">
+            <!-- Identity Section -->
+            <section id="identity" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-sm transition-all hover:border-primary/20">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h3 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Operational Identity</h3>
                 </div>
-            </div>
-
-            <div class="setting-item danger" style="margin-top: 24px;">
-                <div>
-                    <strong style="color:var(--accent-red)">Factory Reset</strong>
-                    <div class="helper">Clear all current session data immediately.</div>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-10 mb-10 pb-10 border-b border-gray-100 dark:border-white/5">
+                    <div class="relative group">
+                        <div class="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-primary to-secondary p-1 overflow-hidden transition-all group-hover:rotate-3 group-hover:scale-[1.05] shadow-xl shadow-primary/20">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar }}" alt="Avatar" class="w-full h-full object-cover rounded-[calc(2.5rem-4px)]">
+                            {% else %}
+                            <div class="w-full h-full bg-white dark:bg-gray-900 rounded-[calc(2.5rem-4px)] flex items-center justify-center">
+                                <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary">{{ user.name[0] | upper }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <label for="avatar-input" class="absolute -bottom-2 -right-2 w-11 h-11 bg-white dark:bg-gray-800 border border-gray-200 dark:border-white/10 rounded-2xl flex items-center justify-center text-primary shadow-xl hover:scale-110 active:scale-90 transition-all cursor-pointer group-hover:bg-primary group-hover:text-white group-hover:border-primary">
+                            <i class="fa-solid fa-camera"></i>
+                        </label>
+                        <input type="file" id="avatar-input" class="hidden">
+                    </div>
+                    <div class="flex-1 text-center sm:text-left space-y-2">
+                        <h4 class="text-3xl font-black tracking-tight">{{ user.name }}</h4>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">{{ user.email }}</p>
+                        <div class="pt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
+                            <span class="px-3.5 py-1.5 bg-green-500/10 text-green-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-green-500/20 shadow-sm">Verified Agent</span>
+                            <span class="px-3.5 py-1.5 bg-amber-500/10 text-amber-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-amber-500/20 shadow-sm">Cloud Sync Enabled</span>
+                        </div>
+                    </div>
                 </div>
-                <form method="POST" action="{{ url_for('settings') }}"
-                    onsubmit="return confirm('Are you sure? This deletes ALL current session data (vehicles, logs, history).');"
-                    style="margin: 0;">
-                    <input type="hidden" name="action" value="reset">
-                    <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i> Reset</button>
+
+                <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {{ InputField('name', 'Display Designation', value=user.name, required=true) }}
+                    {{ InputField('email', 'Communication Node', value=user.email, type='email', disabled=true, helper='Primary system identifier (Read Only)') }}
+                    <div class="md:col-span-2 pt-4">
+                        {{ GradientButton('Synchronize Profile Settings', icon='fa-database', class='sm:w-auto w-full px-10') }}
+                    </div>
                 </form>
-            </div>
+            </section>
+
+            <!-- Localization Section -->
+            <section id="localization" class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-sm transition-all hover:border-secondary/20">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1.5 h-6 bg-secondary rounded-full"></div>
+                    <h3 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">Region & Environment</h3>
+                </div>
+                
+                <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {{ SelectField('unit_system', 'Standard Units', [('metric','Metric (KM/L)'), ('imperial','Imperial (MPG)')], selected='metric') }}
+                    {{ SelectField('currency', 'Global Tender Symbol', [('₹','INR (₹)'), ('$','USD ($)'), ('€','EUR (€)'), ('£','GBP (£)')], selected=currency) }}
+                    <div class="md:col-span-2">
+                        {{ SelectField('theme', 'Visual Operating Protocol', [('light','Optimized Daylight'), ('dark','High-Contrast Darkroom')], selected=theme) }}
+                    </div>
+                    <div class="md:col-span-2 pt-4">
+                        {{ GradientButton('Deploy Environment Parameters', icon='fa-bolt-lightning', class='sm:w-auto w-full px-10 bg-secondary shadow-secondary/25') }}
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const avatarInput = document.getElementById("avatar-input");
+    const avatarContainer = avatarInput.closest('.relative.group').querySelector('.w-32.h-32');
+    
+    // Load existing avatar from localStorage if available
+    const savedAvatar = localStorage.getItem("fw_avatar");
+    if (savedAvatar && avatarContainer) {
+        avatarContainer.innerHTML = `<img src="${savedAvatar}" alt="Avatar" class="w-full h-full object-cover rounded-[calc(2.5rem-4px)]">`;
+    }
+
+    if (avatarInput) {
+        avatarInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    // Persist to localStorage
+                    localStorage.setItem("fw_avatar", base64);
+                    // Show preview
+                    avatarContainer.innerHTML = `<img src="${base64}" alt="Avatar" class="w-full h-full object-cover rounded-[calc(2.5rem-4px)]">`;
+                    
+                    // Show success toast
+                    const toastContainer = document.getElementById('toastContainer');
+                    if (toastContainer) {
+                        const toast = document.createElement('div');
+                        toast.className = "fw-toast";
+                        toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:var(--success);"></i><span>Avatar updated!</span>`;
+                        toastContainer.appendChild(toast);
+                        
+                        setTimeout(() => {
+                            toast.style.transform = "translateX(120%)";
+                            toast.style.opacity = "0";
+                            setTimeout(() => toast.remove(), 400);
+                        }, 3000);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
 {% endblock content %}

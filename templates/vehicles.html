@@ -1,123 +1,135 @@
 {% extends "base.html" %}
+{% from 'components.html' import InputField, SelectField, GradientButton %}
 
 {% block content %}
-<div class="page active" id="page-vehicles">
-    <div class="page-header">
-        <h1>My Vehicles</h1>
-        <p class="page-subtitle">Manage your vehicles for quick calculations.</p>
+<div class="animate-fade-up max-w-6xl mx-auto" id="page-vehicles">
+    <div class="flex flex-col md:flex-row justify-between items-start mb-10 gap-4 px-2">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Fleet Management</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1 font-medium">Configure your vehicles for highly accurate metric processing.</p>
+        </div>
+        <div class="px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-bold uppercase tracking-widest">
+            Fleet Intelligence
+        </div>
     </div>
 
-    <!-- Add Vehicle Form -->
-    <div class="card slide-up">
-        <h3><i class="fa-solid fa-plus"></i> Add New Vehicle</h3>
-        <form id="addVehicleForm" method="POST" action="{{ url_for('vehicles') }}">
-            <input type="hidden" name="action" value="add" id="vehicleAction">
-            {% set selected_fuel = request.form.get('fuelType', 'Petrol') %}
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Vehicle Name</label>
-                    <input type="text" name="name" value="{{ request.form.get('name', '') }}" required
-                        placeholder="Ex: Honda City">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 px-2 lg:items-start">
+        <!-- Add Vehicle Form (Stays Sticky on Desktop) -->
+        <div class="lg:col-span-5 lg:sticky lg:top-8">
+            <div class="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2.5rem] p-8 shadow-sm transition-all hover:border-primary/20">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-1.5 h-6 bg-primary rounded-full"></div>
+                    <h3 class="text-xl font-extrabold text-gray-900 dark:text-white">Initialize Vehicle</h3>
                 </div>
-                <div class="form-group">
-                    <label>Vehicle Type</label>
-                    <select name="type">
-                        <option value="car" {% if request.form.get('type')=='car' %}selected{% endif %}>Car / Sedan
-                        </option>
-                        <option value="suv" {% if request.form.get('type')=='suv' %}selected{% endif %}>SUV / Truck
-                        </option>
-                        <option value="bike" {% if request.form.get('type')=='bike' %}selected{% endif %}>Motorcycle
-                        </option>
-                        <option value="other" {% if request.form.get('type')=='other' %}selected{% endif %}>Other
-                        </option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Fuel Type</label>
-                    {% set vehicles_submit_url = url_for('vehicles') %}
-                    <select name="fuel_type" onchange="document.getElementById('vehicleAction').value='refresh'; this.form.submit();">
-                        <option value="Petrol" {% if selected_fuel=='Petrol' %}selected{% endif %}>Petrol</option>
-                        <option value="Diesel" {% if selected_fuel=='Diesel' %}selected{% endif %}>Diesel</option>
-                        <option value="CNG" {% if selected_fuel=='CNG' %}selected{% endif %}>CNG</option>
-                        <option value="EV" {% if selected_fuel=='EV' %}selected{% endif %}>Electric (EV)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>
-                        {% if selected_fuel == 'EV' %}Efficiency (km/kWh)
-                        {% elif selected_fuel == 'CNG' %}Avg. Mileage (km/kg)
-                        {% else %}Avg. Mileage (km/L){% endif %}
-                    </label>
-                    <input type="number" step="0.1" name="mileage" value="{{ request.form.get('mileage', '') }}"
-                        placeholder="Ex: {% if selected_fuel == 'EV' %}6.5{% else %}18{% endif %}">
-                </div>
-                <div class="form-group">
-                    <label>
-                        {% if selected_fuel == 'EV' %}Battery Capacity (kWh)
-                        {% elif selected_fuel == 'CNG' %}Tank Capacity (kg)
-                        {% else %}Tank Size (L){% endif %}
-                    </label>
-                    <input type="number" step="1" name="tank_size"
-                        value="{{ request.form.get('tank_size', '45' if selected_fuel in ['Petrol', 'Diesel'] else '') }}">
-                </div>
-                <div class="form-group">
-                    <label>Year (Optional)</label>
-                    <input type="number" min="1990" max="2030" step="1" name="year"
-                        value="{{ request.form.get('year', '') }}" placeholder="Ex: 2022">
-                </div>
-            </div>
-            <button type="submit" name="action" value="add" class="btn btn-primary" style="margin-top: 10px;"><i
-                    class="fa-solid fa-check"></i>
-                Add Vehicle</button>
-        </form>
-    </div>
 
-    <!-- Vehicle Gallery -->
-    <div class="vehicle-grid" id="vehicleList">
-        {% if vehicles %}
-        {% for v in vehicles %}
-        <div class="vehicle-card" style="margin-bottom: 20px;">
-            <div class="vc-header">
-                <div class="vc-icon">
-                    <i
-                        class="fa-solid {% if v.vehicle_type == 'bike' %}fa-motorcycle{% elif v.vehicle_type == 'suv' %}fa-truck-monster{% else %}fa-car{% endif %}"></i>
-                </div>
-                <div>
-                    <div class="vc-name">{{ v.vehicle_name }}</div>
-                    <div class="vc-type">{{ v.vehicle_type|default('Car')|capitalize }}</div>
-                </div>
-            </div>
-            <div class="vc-details">
-                <span class="vc-tag">⛽ {{ v.mileage }} {% if v.fuel_type == 'EV' %}km/kWh{% elif v.fuel_type == 'CNG'
-                    %}km/kg{% else %}km/L{% endif %}</span>
-                <span class="vc-tag">🛢️ {{ v.fuel_type }}</span>
-                {% if v.fuel_type == 'EV' and v.get('battery_range', 0) > 0 %}
-                <span class="vc-tag">📦 {{ v.battery_range|round|int }} kWh</span>
-                {% elif v.get('tank_size', 0) > 0 %}
-                <span class="vc-tag">📦 {{ v.tank_size|round|int }} {% if v.fuel_type == 'CNG' %}kg{% else %}L{% endif
-                    %}</span>
-                {% endif %}
-                {% if v.year %}
-                <span class="vc-tag">📅 {{ v.year }}</span>
-                {% endif %}
-            </div>
-            <div class="vc-actions">
-                <form method="POST" action="{{ url_for('vehicles') }}"
-                    onsubmit="return confirm('Are you sure you want to delete {{ v.vehicle_name }}?');" style="flex:1;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="vehicle_id" value="{{ v.id }}">
-                    <button type="submit" class="vc-delete" style="width: 100%; border-radius: 6px;"><i
-                            class="fa-solid fa-trash"></i> Delete</button>
+                <form method="POST" action="{{ url_for('vehicles') }}" class="space-y-6">
+                    <input type="hidden" name="action" value="add">
+                    
+                    {{ InputField('name', 'Vehicle Designation', placeholder='e.g. Tesla Model 3', required=true) }}
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        {{ SelectField('fuel_type', 'Power Source', [('Petrol', 'Petrol'), ('Diesel', 'Diesel'), ('EV', 'Electric'), ('CNG', 'CNG')], selected='Petrol') }}
+                        {{ InputField('year', 'Model Year', placeholder='2024') }}
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        {{ InputField('mileage', 'Efficiency config', type='number', step='0.1', required=true) }}
+                        {{ InputField('tank_size', 'Capacity', type='number', step='0.1', required=true) }}
+                    </div>
+
+                    <div class="pt-4">
+                        {{ GradientButton('Register to Fleet', icon='fa-plus', class='w-full py-4 text-lg') }}
+                    </div>
                 </form>
             </div>
         </div>
-        {% endfor %}
-        {% else %}
-        <p class="empty-state"
-            style="grid-column: 1 / -1; background: var(--bg-card); padding: 40px; border-radius: var(--radius); border: 1px dashed var(--border-color);">
-            No vehicles added yet. Add your first vehicle above!
-        </p>
-        {% endif %}
+
+        <!-- Vehicle List -->
+        <div class="lg:col-span-7 space-y-6">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-black uppercase tracking-widest text-gray-400">Deployed Assets ({{ vehicles|length }})</h3>
+                <div class="h-px flex-1 bg-gray-100 dark:bg-white/5 mx-4"></div>
+            </div>
+
+            {% if not vehicles %}
+            <div class="bg-white/50 dark:bg-white/[0.02] border-2 border-dashed border-gray-200 dark:border-white/10 rounded-[3rem] p-16 text-center group transition-all hover:bg-white dark:hover:bg-white/5">
+                <div class="w-24 h-24 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-6 transition-transform group-hover:scale-110">
+                    <i class="fa-solid fa-car-rear text-4xl text-gray-300 dark:text-gray-600"></i>
+                </div>
+                <h4 class="text-2xl font-black mb-3 text-gray-900 dark:text-white">Garage is Empty</h4>
+                <p class="text-gray-500 dark:text-gray-400 max-w-xs mx-auto mb-8 font-medium">Add your primary vehicle to unlock precise multi-variable fuel diagnostics.</p>
+                <div class="flex justify-center">
+                    <div class="px-6 py-2 rounded-full border border-gray-200 dark:border-white/10 text-[10px] font-bold uppercase tracking-widest text-gray-400">Waiting for Data...</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="grid grid-cols-1 gap-6">
+                {% for v in vehicles %}
+                <div class="group relative bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-[2rem] p-6 transition-all hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 animate-fade-up" style="animation-delay: {{ loop.index * 0.1 }}s">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl shadow-inner transition-transform group-hover:rotate-6">
+                                {% if v.fuel_type == 'EV' %}<i class="fa-solid fa-bolt"></i>
+                                {% else %}<i class="fa-solid fa-car"></i>{% endif %}
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-black tracking-tight text-gray-900 dark:text-white">{{ v.vehicle_name }}</h4>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-xs font-bold uppercase tracking-wide text-primary">{{ v.fuel_type }}</span>
+                                    <span class="w-1 h-1 bg-gray-300 dark:bg-white/20 rounded-full"></span>
+                                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ v.year or 'Standard Edition' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ url_for('vehicles') }}">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="vehicle_id" value="{{ v.id }}">
+                            <button type="submit" class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90" title="Retire Asset">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-8">
+                        <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 transition-colors group-hover:bg-white dark:group-hover:bg-white/10">
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Efficiency Index</span>
+                            <span class="text-lg font-black text-gray-900 dark:text-white">{{ v.mileage }} <span class="text-xs font-medium text-gray-400">{% if v.fuel_type == 'EV' %}km/kWh{% else %}km/L{% endif %}</span></span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-white/5 p-4 rounded-2xl border border-gray-100 dark:border-white/5 transition-colors group-hover:bg-white dark:group-hover:bg-white/10">
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Max Capacity</span>
+                            <span class="text-lg font-black text-gray-900 dark:text-white">{{ v.tank_size }} <span class="text-xs font-medium text-gray-400">{% if v.fuel_type == 'EV' %}kWh{% else %}L{% endif %}</span></span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Sync backend vehicles to localStorage to ensure global state consistency
+    const backendVehicles = {{ vehicles | tojson | safe }};
+    if (backendVehicles && backendVehicles.length >= 0) {
+        localStorage.setItem("fw_vehicles", JSON.stringify(backendVehicles));
+    }
+    
+    // Basic Form validation
+    const form = document.querySelector('form[action="{{ url_for("vehicles") }}"]');
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            const name = form.querySelector('input[name="name"]').value;
+            const mileage = form.querySelector('input[name="mileage"]').value;
+            const tank = form.querySelector('input[name="tank_size"]').value;
+            
+            if (!name || !mileage || !tank || mileage <= 0 || tank <= 0) {
+                e.preventDefault();
+                alert("Please fill out Name, and provide positive values for Capacity and Efficiency.");
+            }
+        });
+    }
+});
+</script>
 {% endblock content %}

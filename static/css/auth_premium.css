@@ -184,42 +184,33 @@ body {
     background: rgba(15, 23, 42, 0.6);
     border: 1.5px solid var(--border-glass);
     border-radius: var(--radius-md);
-    padding: 18px 16px;
+    padding: 14px 16px;
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;
     transition: var(--transition-smooth);
     outline: none;
 }
 
 .input-field::placeholder {
-    color: transparent;
+    color: #64748b;
+    opacity: 0.6;
 }
 
 .field-label {
-    position: absolute;
-    left: 16px;
-    top: 18px;
+    display: block;
+    margin-bottom: 8px;
+    margin-left: 4px;
     color: var(--text-muted);
-    pointer-events: none;
-    transition: var(--transition-smooth);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.input-field:focus,
-.input-field:not(:placeholder-shown) {
+.input-field:focus {
     border-color: #6366f1;
     background: rgba(15, 23, 42, 0.9);
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-}
-
-.input-field:focus + .field-label,
-.input-field:not(:placeholder-shown) + .field-label {
-    top: -10px;
-    left: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #818cf8;
-    background: #1e293b;
-    padding: 0 6px;
 }
 
 /* Visibility Toggle */

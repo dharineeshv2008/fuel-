@@ -63,14 +63,14 @@
 
                 <form action="{{ url_for('login') }}" method="POST" id="authForm" novalidate>
                     <div class="form-group">
-                        <input type="email" id="email" name="email" class="input-field" placeholder="john@example.com" required autocomplete="email">
                         <label for="email" class="field-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="input-field" placeholder="john@example.com" required autocomplete="email">
                     </div>
 
-                    <div class="form-group">
-                        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required autocomplete="current-password">
+                    <div class="form-group" style="position: relative;">
                         <label for="password" class="field-label">Password</label>
-                        <button type="button" class="password-toggle" id="togglePassword">
+                        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required autocomplete="current-password">
+                        <button type="button" class="password-toggle" id="togglePassword" style="top: 40px;">
                             <i class="fa-solid fa-eye" id="eyeIcon"></i>
                         </button>
                     </div>

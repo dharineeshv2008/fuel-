@@ -1,128 +1,143 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ theme }}">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FuelWise — Smart Fuel Cost Calculator</title>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        accent: '#38bdf8',
+                        dark: '#0a0a0f',
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.25rem',
+                    }
+                }
+            }
+        }
+    </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- App CSS -->
+    <!-- Majestic CSS Component System -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <script>
+        // Theme initialization
+        (function() {
+            const savedTheme = localStorage.getItem('fw-theme') || 'light';
+            document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     {% block head %}{% endblock %}
 </head>
-
-<body>
-
-    <!-- SIDEBAR NAV -->
-    {% if request.endpoint not in ['login', 'register'] %}
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <i class="fa-solid fa-gas-pump"></i>
-                <span>FuelWise</span>
+<body class="transition-colors duration-300">
+    <div class="layout-wrapper">
+        <!-- SIDEBAR NAV -->
+        {% if request.endpoint not in ['login', 'register'] %}
+        <aside class="fw-sidebar" id="sidebar">
+            <div style="padding: 32px 24px; display:flex; align-items:center; gap:12px;">
+                <div style="width:36px; height:36px; border-radius:12px; background:linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-glow); font-size:1.1rem;">
+                    <i class="fa-solid fa-bolt" style="color:#fff;"></i>
+                </div>
+                <span style="font-size:1.4rem; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(to right, #fff, #a5b4fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">FuelWise</span>
             </div>
-            <!-- Mobile closed menu placeholder -->
-            <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
 
-        {% if user %}
-        <div class="user-profile-sm">
-            <div class="user-avatar">
-                {{ user.name[0] | upper }}
+            <!-- Theme Toggle -->
+            <div style="padding: 0 24px 16px 24px;">
+                <button id="themeSwitcher" class="flex items-center justify-between w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-sm font-medium">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-moon dark-only hidden dark:block"></i>
+                        <i class="fa-solid fa-sun light-only block dark:hidden text-amber-400"></i>
+                        <span id="themeText">Light Mode</span>
+                    </span>
+                    <div class="w-8 h-4 bg-gray-600 rounded-full relative">
+                        <div id="themeIndicator" class="absolute top-1 left-1 w-2 h-2 bg-white rounded-full transition-all"></div>
+                    </div>
+                </button>
             </div>
-            <div class="user-info">
-                <span class="user-name">{{ user.name }}</span>
-                <span class="user-email">{{ user.email }}</span>
+
+            <nav class="fw-sidebar-nav">
+                <a href="{{ url_for('dashboard') }}" class="fw-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie" style="width:24px; text-align:center;"></i><span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('calculator') }}" class="fw-nav-item {% if request.endpoint == 'calculator' %}active{% endif %}">
+                    <i class="fa-solid fa-calculator" style="width:24px; text-align:center;"></i><span>Calculator</span>
+                </a>
+                <a href="{{ url_for('trip_planner') }}" class="fw-nav-item {% if request.endpoint == 'trip_planner' %}active{% endif %}">
+                    <i class="fa-solid fa-route" style="width:24px; text-align:center;"></i><span>Trip Planner</span>
+                </a>
+                <a href="{{ url_for('history') }}" class="fw-nav-item {% if request.endpoint == 'history' %}active{% endif %}">
+                    <i class="fa-solid fa-clock-rotate-left" style="width:24px; text-align:center;"></i><span>History</span>
+                </a>
+                <a href="{{ url_for('vehicles') }}" class="fw-nav-item {% if request.endpoint == 'vehicles' %}active{% endif %}">
+                    <i class="fa-solid fa-car-side" style="width:24px; text-align:center;"></i><span>Vehicles</span>
+                </a>
+                <a href="{{ url_for('settings') }}" class="fw-nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <i class="fa-solid fa-gear" style="width:24px; text-align:center;"></i><span>Settings</span>
+                </a>
+            </nav>
+
+            {% if user %}
+            <div style="padding:24px 16px; border-top:1px solid var(--border-glass);">
+                <div style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.02); border-radius:var(--radius-md); border:1px solid var(--border-glass);">
+                    <div style="width:36px; height:36px; border-radius:50%; background:var(--brand-secondary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem;">
+                        {{ user.name[0] | upper }}
+                    </div>
+                    <div style="flex:1;">
+                        <span style="font-weight:600; font-size:0.9rem; display:block;">{{ user.name }}</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted); display:block;">{{ user.email }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" title="Logout" style="color:var(--text-muted); transition:0.3s; margin-left:auto;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
             </div>
-        </div>
+            {% endif %}
+        </aside>
         {% endif %}
 
-        <nav class="sidebar-nav">
-            <a href="{{ url_for('dashboard') }}"
-                class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
-            </a>
-            <a href="{{ url_for('calculator') }}"
-                class="nav-item {% if request.endpoint == 'calculator' %}active{% endif %}">
-                <i class="fa-solid fa-calculator"></i><span>Calculator</span>
-            </a>
-            <a href="{{ url_for('trip_planner') }}"
-                class="nav-item {% if request.endpoint == 'trip_planner' %}active{% endif %}">
-                <i class="fa-solid fa-route"></i><span>Trip Planner</span>
-            </a>
-            <a href="{{ url_for('history') }}" class="nav-item {% if request.endpoint == 'history' %}active{% endif %}">
-                <i class="fa-solid fa-clock-rotate-left"></i><span>History</span>
-            </a>
-            <a href="{{ url_for('vehicles') }}"
-                class="nav-item {% if request.endpoint == 'vehicles' %}active{% endif %}">
-                <i class="fa-solid fa-car-side"></i><span>Vehicles</span>
-            </a>
-            <a href="{{ url_for('settings') }}"
-                class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
-                <i class="fa-solid fa-gear"></i><span>Settings</span>
-            </a>
-        </nav>
-
-        <div class="sidebar-footer">
-            <div class="footer-actions">
-                <form action="{{ url_for('settings') }}" method="POST" style="margin: 0; flex: 1;">
-                    <input type="hidden" name="action" value="save">
-                    <input type="hidden" name="theme" value="{{ 'light' if theme == 'dark' else 'dark' }}">
-                    <input type="hidden" name="currency" value="{{ currency }}">
-                    <button type="submit" class="theme-toggle" title="Toggle Theme">
-                        {% if theme == 'dark' %}
-                        <i class="fa-solid fa-sun"></i>
-                        {% else %}
-                        <i class="fa-solid fa-moon"></i>
-                        {% endif %}
-                    </button>
-                </form>
-                
-                <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </a>
+        <!-- MAIN -->
+        <main class="main-content">
+            {% if request.endpoint not in ['login', 'register'] %}
+            <!-- Mobile Header (Fixed in CSS) -->
+            <div id="mobileHead" style="display:none; padding:16px 20px; border-bottom:1px solid var(--border-glass);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); display:flex; align-items:center; justify-content:center;">
+                        <i class="fa-solid fa-bolt" style="color:#fff; font-size:0.8rem;"></i>
+                    </div>
+                    <span style="font-weight:800; font-size:1.1rem;">FuelWise</span>
+                </div>
+                <button id="menuToggle" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
             </div>
-        </div>
-    </aside>
-    {% endif %}
-
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <!-- MOBILE HEADER -->
-        <header class="mobile-header">
-            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <div class="mobile-title">
-                <i class="fa-solid fa-gas-pump"></i> FuelWise
+            {% endif %}
+            
+            <div class="content-container">
+                {% block content %}{% endblock content %}
             </div>
-        </header>
+        </main>
+    </div>
 
-        {% block content %}{% endblock content %}
-    </main>
-
-    <!-- TOAST NOTIFICATIONS (Uses Flask Flash Messages) -->
-    <div class="toast-container" id="toastContainer">
+    <!-- TOASTS -->
+    <div id="toastContainer">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
-        <div class="toast {{ category }}">
-            {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
-            {% elif category == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
-            {% elif category == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
-            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+        <div class="fw-toast">
+            {% if category == 'success' %}<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>
+            {% elif category == 'error' %}<i class="fa-solid fa-circle-xmark" style="color:var(--danger);"></i>
+            {% else %}<i class="fa-solid fa-circle-info" style="color:var(--brand-accent);"></i>{% endif %}
             <span>{{ message }}</span>
         </div>
         {% endfor %}
@@ -130,38 +145,78 @@
         {% endwith %}
     </div>
 
-    <!-- TINY SCRIPT TO HIDE TOASTS AND HANDLE MOBILE MENU -->
     <script>
-        // Only minimal script to handle mobile sidebar and hide flash messages after 3 seconds
-        document.addEventListener("DOMContentLoaded", function () {
-            setTimeout(function () {
-                var toasts = document.querySelectorAll(".toast");
-                toasts.forEach(function (t) { t.style.display = "none"; });
-            }, 3000);
+        document.addEventListener("DOMContentLoaded", () => {
+            // Toast Auto-hide
+            const toasts = document.querySelectorAll(".fw-toast");
+            toasts.forEach(t => { 
+                setTimeout(() => { 
+                    t.style.transform = "translateX(120%)"; 
+                    t.style.opacity="0"; 
+                    setTimeout(()=>t.remove(), 400); 
+                }, 4000); 
+            });
+            
+            // Sidebar Toggle Logic
+            const btn = document.getElementById("menuToggle");
+            const sb = document.getElementById("sidebar");
+            const wrapper = document.querySelector('.layout-wrapper');
+            
+            if(btn && sb) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sb.classList.toggle('open');
+                });
 
-            var menuToggle = document.getElementById("menuToggle");
-            var sidebar = document.getElementById("sidebar");
-            var closeBtn = document.getElementById("sidebarClose");
-            var overlay = document.getElementById("sidebarOverlay");
-
-            if (menuToggle && sidebar) {
-                menuToggle.addEventListener("click", function () {
-                    sidebar.classList.add("open");
-                    overlay.classList.add("active");
+                // Close sidebar on click outside
+                document.addEventListener('click', (e) => {
+                    if (sb.classList.contains('open') && !sb.contains(e.target) && e.target !== btn) {
+                        sb.classList.remove('open');
+                    }
                 });
             }
-            if (closeBtn && overlay) {
-                closeBtn.addEventListener("click", function () {
-                    sidebar.classList.remove("open");
-                    overlay.classList.remove("active");
-                });
-                overlay.addEventListener("click", function () {
-                    sidebar.classList.remove("open");
-                    overlay.classList.remove("active");
+
+            // Theme Switcher Logic
+            const themeBtn = document.getElementById("themeSwitcher");
+            const themeText = document.getElementById("themeText");
+            const themeIndicator = document.getElementById("themeIndicator");
+
+            function updateThemeUI(theme) {
+                themeText.innerText = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+                if(themeIndicator) {
+                    themeIndicator.style.left = theme === 'dark' ? 'calc(100% - 12px)' : '4px';
+                }
+            }
+
+            if(themeBtn) {
+                const currentTheme = localStorage.getItem('fw-theme') || 'light';
+                updateThemeUI(currentTheme);
+
+                themeBtn.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.toggle('dark');
+                    const newTheme = isDark ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                    localStorage.setItem('fw-theme', newTheme);
+                    updateThemeUI(newTheme);
                 });
             }
+
+            // Button Loading States
+            const forms = document.querySelectorAll("form");
+            forms.forEach(f => {
+                f.addEventListener("submit", () => {
+                    const btns = f.querySelectorAll("button[type='submit']");
+                    btns.forEach(b => {
+                        if (!b.hasAttribute('data-no-disable')) {
+                            const originalText = b.innerHTML;
+                            b.classList.add("loading");
+                            b.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+                            setTimeout(() => { b.disabled = true; }, 10);
+                        }
+                    });
+                });
+            });
         });
     </script>
 </body>
-
 </html>

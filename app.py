@@ -191,6 +191,10 @@ def calculator():
             else:
                 result = calculate_fuel(dist, mileage, price, request.form.get("trip_type", "one-way"), int(safe_float(request.form.get("passengers", 1))), safe_float(request.form.get("daily_km")), fuel_type)
                 result["fuel_price"] = price
+                if vehicle_id:
+                    result["unit"] = "kWh" if fuel_type == "EV" else "Liters (L)"
+                else:
+                    result["unit"] = ""
                 flash("Calculation complete!", "success")
         except Exception as e: flash(f"Calculator Error: {str(e)}", "error")
 

@@ -47,19 +47,19 @@
 
                 <form action="/register" method="POST" id="authForm" novalidate>
                     <div class="form-group">
-                        <input type="text" id="name" name="name" class="input-field" placeholder="John Doe" required autocomplete="name">
                         <label for="name" class="field-label">Full Name</label>
+                        <input type="text" id="name" name="name" class="input-field" placeholder="John Doe" required autocomplete="name">
                     </div>
 
                     <div class="form-group">
-                        <input type="email" id="email" name="email" class="input-field" placeholder="john@example.com" required autocomplete="email">
                         <label for="email" class="field-label">Email Address</label>
+                        <input type="email" id="email" name="email" class="input-field" placeholder="john@example.com" required autocomplete="email">
                     </div>
 
-                    <div class="form-group">
-                        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
+                    <div class="form-group" style="position: relative;">
                         <label for="password" class="field-label">Password</label>
-                        <button type="button" class="password-toggle" id="togglePassword">
+                        <input type="password" id="password" name="password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
+                        <button type="button" class="password-toggle" id="togglePassword" style="top: 38px;">
                             <i class="fa-solid fa-eye" id="eyeIcon"></i>
                         </button>
                         
@@ -71,8 +71,8 @@
                     </div>
 
                     <div class="form-group">
-                        <input type="password" id="confirm_password" name="confirm_password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
                         <label for="confirm_password" class="field-label">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="input-field" placeholder="••••••••" required autocomplete="new-password">
                     </div>
 
                     <div class="checkbox-group">
